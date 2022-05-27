@@ -1,0 +1,9 @@
+flask-admin
+flask-login
+flask-migrate
+flask-wtf
+geoalchemy2
+geomet
+pip-chill
+psycopg2
+shapely
