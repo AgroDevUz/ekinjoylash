@@ -33,10 +33,19 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-         
+              {% if current_user.role =='admin' %}
+              <li class="nav-item">
+                <a href="{{ url_for('admin.index') }}" class="nav-link">
+                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <p>
+                    Admin
+                  </p>
+                </a>
+              </li>
+              {% endif %}
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-tachometer-alt"></i>
+                  <i class="nav-icon fas fa-user"></i>
                   <p>
                     User
                     <i class="right fas fa-angle-left"></i>
