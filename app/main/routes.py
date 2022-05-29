@@ -223,15 +223,4 @@ def dist_data(id):
 
     return jsonify([x.format() for x in d])
 
-@main.route("/district")
-def get_district():
-    dist = District.query.get(current_user.district_id)
-    prc = Province.query.get(dist.region_id)
-    rest = db.session.query(ST_AsGeoJSON(District.geometry), District.nameru).filter(District.region_id==prc.id, District.district_prefix==dist.district_prefix).first()
-    print(rest)
-    geojson = rest[0]
-    geojson = json.loads(geojson)
-    geojson['attributes'] = {
-        "nameru": rest[1] 
-    }
-    return jsonify(geojson)
+
