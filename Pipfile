@@ -14,6 +14,7 @@ Flask-WTF = "*"
 GeoAlchemy2 = "*"
 Shapely = "*"
 flask-caching = "*"
+flask-debugtoolbar = "*"
 
 [dev-packages]
 autopep8 = "*"
