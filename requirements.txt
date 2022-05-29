@@ -1,0 +1,13 @@
+autopep8
+flask-admin
+flask-cache
+flask-caching
+flask-debugtoolbar
+flask-login
+flask-migrate
+flask-wtf
+geoalchemy2
+geomet
+pip-chill
+psycopg2
+shapely
