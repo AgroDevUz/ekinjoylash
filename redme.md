@@ -1,4 +1,0 @@
-# Crop Schedule Application
-
-
-
