@@ -13,6 +13,7 @@ Flask-Migrate = "*"
 Flask-WTF = "*"
 GeoAlchemy2 = "*"
 Shapely = "*"
+flask-caching = "*"
 
 [dev-packages]
 autopep8 = "*"
