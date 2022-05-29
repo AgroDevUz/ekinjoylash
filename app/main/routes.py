@@ -200,21 +200,6 @@ def delete_user():
     
     return render_template('pages/user/delete.html')
 
-@main.route("/user/reg_data", methods=['GET'])
-@login_required
-def reg_data():
-    id = int(request.args.get('id'))
-
-    u = User.query.get_or_404(id)
-    d = District.query.get(u.district_id)
-    p = Province.query.get(d.region_id)
-
-    data = {
-        'district' : d,
-        'region' : p
-    }
-
-    return jsonify(data)
 
 @main.route("/dist_data/<int:id>", methods=['GET'])
 @login_required
