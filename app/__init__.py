@@ -1,12 +1,17 @@
+from functools import cache
 from flask import Flask
 from flask_login import LoginManager
 from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_caching import Cache
+
+
 login_manager = LoginManager()
 admin = Admin(name='microblog', template_mode='bootstrap4')
 db = SQLAlchemy()
 migrate = Migrate()
+cache = Cache()
 
 def create_app():
     app = Flask(__name__)
@@ -15,9 +20,12 @@ def create_app():
     admin.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
+    cache.init_app(app)
     
     from app.main.routes import main
+    from app.api.routes import api
     app.register_blueprint(main)
+    app.register_blueprint(api)
     
     @app.after_request
     def after_request(response):
