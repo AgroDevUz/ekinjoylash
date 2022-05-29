@@ -2,3 +2,5 @@ __pycache__
 AdminLTE
 env
 crop_monitoring
+musor
+app/configs/config.py

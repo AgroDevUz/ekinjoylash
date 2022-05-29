@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+geomet = "*"
+pip-chill = "*"
+psycopg2 = "*"
+Flask-Admin = "*"
+Flask-Login = "*"
+Flask-Migrate = "*"
+Flask-WTF = "*"
+GeoAlchemy2 = "*"
+Shapely = "*"
+
+[dev-packages]
+autopep8 = "*"
+
+[requires]
+python_version = "3.9"

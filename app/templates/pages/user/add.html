@@ -1,0 +1,127 @@
+{% extends "layout/base.html" %}
+{% block content %}
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Adding a new user</h1>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <form method="post">
+                <div class="row">
+                    <!-- left column -->
+                    <div class="col-md-6">
+                        <!-- general form elements -->
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">Personal info</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <label for="login">Username</label>
+                                        <input type="text" class="form-control" name="login" id="login" placeholder="Username">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="pass">Password</label>
+                                        <input type="password" class="form-control" name="pass" id="pass" placeholder="Password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="conf">Confirm password</label>
+                                        <input type="password" class="form-control" name="conf" id="conf" placeholder="Password">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Select Region</label>
+                                        <select name="dist" id="person_province" class="form-control select2bs4" style="width: 100%;">
+                                        {% for reg in data['regions'] %}
+                                            <option value="{{ reg.id }}">{{ reg.name }}</option>
+                                        {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Select District</label>
+                                        <select id="person_district" name="person_district" class="form-control select2bs4" style="width: 100%;">
+
+                                        </select>
+                                    </div>
+                                </div>
+                                <!-- /.card-body -->
+    
+                                <div class="card-footer">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- general form elements -->
+                        <div class="card card-primary">
+                            <div class="card-header">
+                                <h3 class="card-title">User Permissions</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <!-- form start -->
+                            <div class="card-body">
+                                {% for p in data['perms'] %}
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="perms" id="perms" value="{{ p }}">
+                                    <label class="form-check-label" for="perms">{{ p }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+  <!-- /.content-wrapper -->
+  {% endblock %}
+
+  {% block js %}
+<script>
+    var API_URL = "http://192.168.43.190:1425/"
+
+    function get_dis() {
+        $("#person_district").prop( "disabled", true );
+        var regionid = $('#person_province').val();
+        $.ajax({
+            url: API_URL + "dist_data/" + regionid,
+            method: 'get',
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function(data) {
+                $("#person_district").empty();
+                for (var i in data) {
+                    var dis = "<option value='" + data[i].id + "'> " + data[i].name + " </option>";
+                    $("#person_district").append(dis);
+                }
+                $("#person_district").prop( "disabled", false );
+                
+            },
+            error: function(resp) {
+                console.log(resp);
+            }
+        })
+    }
+    $(document).ready(function() {
+        get_dis();
+        
+    })
+    $("#person_province").change(function(){
+        get_dis();
+    });
+        
+</script>
+
+{% endblock %}
