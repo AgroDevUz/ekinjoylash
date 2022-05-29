@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_caching import Cache
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_babelex import Babel
 
 login_manager = LoginManager()
 admin = Admin(name='microblog', template_mode='bootstrap4')
@@ -13,6 +14,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 cache = Cache()
 toolbar = DebugToolbarExtension()
+babel = Babel()
 def create_app():
     app = Flask(__name__)
     app.config.from_pyfile('configs/config.py')
@@ -22,6 +24,12 @@ def create_app():
     migrate.init_app(app, db)
     cache.init_app(app)
     toolbar.init_app(app)
+    babel.init_app(app)
+    @babel.localeselector
+    def get_locale():
+            # Put your logic here. Application can store locale in
+            # user profile, cookie, session, etc.
+            return 'ru'
     from app.main.routes import main
     from app.api.routes import api
     app.register_blueprint(main)
