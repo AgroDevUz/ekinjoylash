@@ -24,7 +24,8 @@ class User(UserMixin, db.Model):
     last_login = db.Column(db.DateTime)
     district_id = db.Column(db.Integer, db.ForeignKey('district.id'), nullable=True)
     permissions = relationship("Permission", backref="user", lazy=True)
-
+    def __repr__(self):
+        return "%s"%(self.login)
     def format(self):
         return {
             'id' : self.id,
@@ -51,7 +52,8 @@ class Province(db.Model):
     region_prefix = db.Column(db.String, nullable=False)
     geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON", srid=3857), nullable = True)
     districts = relationship("District", backref="province", lazy=True)
-
+    def __repr__(self):
+        return "%s (%s)"%(self.nameru, self.region_prefix)
 class District(db.Model):
     __tablename__ = "district"
     id = db.Column(db.Integer, primary_key=True)
@@ -61,7 +63,8 @@ class District(db.Model):
     district_prefix = db.Column(db.String, nullable=False)
     geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON", srid=3857), nullable = True)
     users = relationship("User", backref="district", lazy=True)
-
+    def __repr__(self):
+        return "%s (%s)"%(self.nameru,self.district_prefix)
     def format(self):
         return {
         'id' : self.id,
@@ -73,7 +76,8 @@ class Permission(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     permission = db.Column(db.String, nullable=False)
     value = db.Column(db.Boolean, nullable=False)
-
+    def __repr__(self):
+        return "%s"%(self.permission)
     def format(self):
         return {
             'id' : self.id,
@@ -86,7 +90,8 @@ class CropName(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     code = db.Column(db.Integer, nullable=False)
-
+    def __repr__(self):
+        return "%s (%s)"%(self.name,self.code)
 
     def format(self):
         return {
