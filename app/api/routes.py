@@ -14,7 +14,8 @@ def get_district():
         dist = District.query.get(dist_id)
         prc = Province.query.get(dist.region_id)
         rest = db.session.query(ST_AsGeoJSON(District.geometry), District.nameru).filter(District.region_id==prc.id, District.district_prefix==dist.district_prefix).first()
-        print(rest)
+        if not rest:
+            return {}
         FeatureCollection = {
             "type" : "FeatureCollection",
             "features" : [],
