@@ -4,3 +4,4 @@ env
 crop_monitoring
 musor
 app/configs/config.py
+cache
