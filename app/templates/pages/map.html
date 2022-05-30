@@ -130,38 +130,46 @@
     
     
     const district = districts_data['features']
+
     
-    const findDistricts = district.find(d => {
-      return d['properties']['cadastr_num'] == cad_num
+        $.ajax({
+            url: '{{ url_for('api.get_district') }}',
+            type: 'GET',
+            dataType: 'json',
+            xhrFields: {
+            withCredentials: true
+            },
+            success: function(data){
+                 const districtsLayer = L.geoJSON(data, {
+                    style: districtStyle,
+                    })
+                    console.log(data);
+                    districtsLayer.addTo(map)
+                    .bindTooltip(data['features'][0]['properties']['nameru'],
+                    { permanent: true, direction: "center", className: "my-labels" }
+                    ).openTooltip()
+                    map.fitBounds(districtsLayer.getBounds())
+                    map.spin(true)
+                // console.log(data)
+                return data
+            }
     })
+
+   
+
+
     
     
     
-    let farmers = null
-    if (!cad_num || !findDistricts ) {
-        const all_districts = L.geoJSON(districts, {
-          style: districtStyle,
-          onEachFeature: (feature, layer) =>{}
-         })
-        all_districts.addTo(map)
-        map.fitBounds(all_districts.getBounds())
-    
-    } else {
-        const districtsLayer = L.geoJSON(findDistricts, {
-          style: districtStyle,
-    
-        })
-        districtsLayer.addTo(map).bindTooltip(findDistricts['properties']['name'],
-          { permanent: true, direction: "center", className: "my-labels" }
-        ).openTooltip()
-        map.fitBounds(districtsLayer.getBounds())
-        map.spin(true)
+
+       
+
     
         $.ajax({
             url: 'https://api.agro.uz/gis_bridge/eijara?prefix='+cad_num,
             dataType: "json"
         }).always(response => {
-            
+ 
             var t_r = 1;
             
             for(var item of response[0].features){
@@ -200,9 +208,8 @@
                     var popupContent = '<table>';
                         
                     for (var p in feature.properties) {
-
                         popupContent += '<tr><td>' + p + '</td><td>'+ feature.properties[p] + '</td></tr>';
-                        }
+                    }
                     popupContent += '</table>';
                     layer.bindPopup(popupContent);
        }
@@ -212,7 +219,7 @@
     
             map.spin(false)
         })
-    }
+    
     
     function resetHighlight(e) {
         farmers.resetStyle(e.target);
@@ -246,12 +253,6 @@
     
         map.fitBounds(e.target.getBounds());
     }
-    //map.on('popupopen', function(centerMarker) {
-    //    var cM = map.project(centerMarker.popup._latlng);
-    //    cM.y -= centerMarker.popup._container.clientHeight/2
-    //    map.setView(map.unproject(cM),16, {animate: true});
-    //});
-    
     
     
     var legend = L.control({position: 'bottomright'});
