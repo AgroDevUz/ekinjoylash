@@ -27,3 +27,12 @@
     box-shadow: 0 0 15px rgba(0,0,0,0.2);
     border-radius: 5px;
 }
+
+.fixed_custom{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 999999;
+    color: white;
+    opacity: 0;
+}
