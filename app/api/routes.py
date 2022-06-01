@@ -6,6 +6,8 @@ from geoalchemy2.functions import ST_AsGeoJSON
 import json
 api = Blueprint("api",__name__, url_prefix='/api')
 
+
+
 @api.route("/district", methods=['GET'])
 @login_required
 def get_district():

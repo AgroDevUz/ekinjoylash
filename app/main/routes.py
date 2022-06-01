@@ -1,32 +1,39 @@
 from flask import (
-    Blueprint, 
-    send_from_directory, 
-    render_template, 
+    Blueprint,
+    send_from_directory,
+    render_template,
     redirect,
     url_for,
     jsonify,
     request,
-    
-    
 )
-from flask_login import (login_required, 
-                         logout_user, 
-                         login_user,
-                         current_user)
-from geoalchemy2.functions import ST_AsGeoJSON
-from app import db,login_manager
-import json
-from .models import (District, 
-                     Province, 
-                     User,
-                     Permission, 
-                     CropName)
+from flask_login import (
+    login_required,
+    logout_user,
+    login_user,
+    current_user
+)
+
+from .models import (
+    District,
+    Province,
+    User,
+    Permission
+)
 from .forms import LoginForm
-main = Blueprint("main",__name__, url_prefix='/')
+from geoalchemy2.functions import ST_AsGeoJSON
+from app import db, login_manager
+import json
+
+main = Blueprint("main", __name__, url_prefix='/')
+
 PERMISSIONS = ['User can edit data', 'User can view data']
+
+
 @main.route('/uploads/<path:path>')
 def send_uploads(path):
     return send_from_directory('uploads', path, as_attachment=True)
+
 
 @main.route("/")
 @login_required
@@ -35,15 +42,22 @@ def index():
 
 
 @main.route("/map")
-@login_required 
+@login_required
 def map():
     dist = District.query.get(current_user.district_id)
     prc = Province.query.get(dist.region_id)
     return render_template('pages/map.html', data=str(prc.region_prefix + ':' + dist.district_prefix))
 
+@main.route("/map/item")
+@login_required
+def map_item():
+    return render_template('pages/map_item.html')
+
+
 @login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect('/login')
+
 
 def has_no_empty_params(rule):
     defaults = rule.defaults if rule.defaults is not None else ()
@@ -62,6 +76,7 @@ def has_no_empty_params(rule):
 
 #     return jsonify(links)
 
+
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -78,13 +93,16 @@ def login():
         print(form.errors)
     return render_template('pages/login.html', form=form)
 
+
 @main.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("main.login_page"))
 
-#USER CRUD
+# USER CRUD
+
+
 @main.route("/add_user", methods=['GET', 'POST'])
 @login_required
 def add_user():
@@ -93,10 +111,10 @@ def add_user():
     if request.method == 'GET':
         regions = Province.query.all()
         data = {
-            "regions" : regions,
-            "perms" : PERMISSIONS
+            "regions": regions,
+            "perms": PERMISSIONS
         }
-        return render_template('pages/user/add.html',data=data)
+        return render_template('pages/user/add.html', data=data)
     else:
         u_login = request.form.get('login')
         u_pass = request.form.get('pass')
@@ -106,8 +124,8 @@ def add_user():
         print('perms', u_perms)
         print('CONF', conf)
         u = User(
-            login = u_login,
-            district_id = u_dist
+            login=u_login,
+            district_id=u_dist
         )
         if conf == u_pass:
             u.set_password(u_pass)
@@ -117,32 +135,34 @@ def add_user():
         for i in PERMISSIONS:
             if i in u_perms:
                 p = Permission(
-                    user_id = u.id,
-                    permission = i,
-                    value = True
+                    user_id=u.id,
+                    permission=i,
+                    value=True
                 )
             else:
                 p = Permission(
-                    user_id = u.id,
-                    permission = i,
-                    value = False
+                    user_id=u.id,
+                    permission=i,
+                    value=False
                 )
             db.session.add(p)
             db.session.commit()
 
         return redirect(url_for('main.index'))
 
+
 @main.route("/all_users", methods=['GET'])
 @login_required
 def all_users():
     users = User.query.filter(User.role != 'admin').all()
-    
+
     data = {
-        'users' : [x.format() for x in users],
-        'perms' : PERMISSIONS
+        'users': [x.format() for x in users],
+        'perms': PERMISSIONS
     }
     print('DATA', data)
     return render_template('pages/user/all.html', data=data)
+
 
 @main.route("/user", methods=['GET'])
 @login_required
@@ -153,11 +173,12 @@ def read_user():
     p = Permission.query.filter_by(user_id=u.id).all()
 
     data = {
-        'userdata' : u,
-        'permissions' : p
+        'userdata': u,
+        'permissions': p
     }
 
     return render_template('pages/user/user.html', data=data)
+
 
 @main.route("/user/edit", methods=['GET', 'POST'])
 @login_required
@@ -178,15 +199,17 @@ def edit_user():
                 u.password = u.set_password(u_pass)
         if u_dist:
             u.dist = u_dist
-        
+
         for i in PERMISSIONS:
             if i in u_perms:
-                p = Permission.query.filter_by(user_id=u.id, permission=i).first()
+                p = Permission.query.filter_by(
+                    user_id=u.id, permission=i).first()
                 p.value = not bool(p.value)
-        
+
         db.session.commit()
-    
+
         return render_template('pages/user/edit.html')
+
 
 @main.route("/user/delete", methods=['GET'])
 @login_required
@@ -197,7 +220,7 @@ def delete_user():
 
     db.session.delete(u)
     db.session.commit()
-    
+
     return render_template('pages/user/delete.html')
 
 
@@ -207,5 +230,3 @@ def dist_data(id):
     d = District.query.filter(District.region_id == id).all()
 
     return jsonify([x.format() for x in d])
-
-
