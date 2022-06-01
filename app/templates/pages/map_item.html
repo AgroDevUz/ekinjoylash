@@ -1,0 +1,96 @@
+{% extends "layout/base.html" %}
+
+{% block title %} Map {% endblock%}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')}}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/datatables-responsive/css/responsive.bootstrap4.min.css')}}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='plugins/datatables-buttons/css/buttons.bootstrap4.min.css')}}">
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/map/style.css')}}">
+  <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+<style>
+    .control-sidebar{
+        width: 70vw !important;
+        overflow: scroll;
+    }
+    #right-bar{
+        display: flex;
+    padding: 25px;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    }
+    #right-table th {
+        vertical-align: middle;
+    }
+</style>
+
+{% endblock %}
+
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div id="map"> </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block right %}
+<div id='right-bar'> 
+
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+{{ url_for('static', filename='dist/css/map/style.css')}}
+
+<script src="{{ url_for('static', filename='dist/js/map/leaflet.spin.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='dist/js/map/spin.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='dist/js/map/style.js')}}"></script>
+
+
+  <script>
+    const defaultCenter = [42, 64]
+    const defaultZoom = 10
+    
+    const mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
+    const mbUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    
+    const grayscale = L.tileLayer(mbUrl, {id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr});
+    const streets = L.tileLayer(mbUrl, {id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: mbAttr});
+    const satellite = L.tileLayer(mbUrl, {id: 'mapbox/satellite-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr});
+    const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3']
+    });
+    
+    const baseLayers = {
+            'Grayscale': grayscale,
+            'Streets': streets,
+            'Satellite': satellite,
+            'Satellite (google)': googleSat
+    }
+    
+    const map = L.map('map',
+        {
+            center: defaultCenter,
+            zoom: defaultZoom,
+            layers: [satellite]
+        })
+    
+    var layerControl = L.control.layers(baseLayers).addTo(map);
+   
+    legend.addTo(map);
+    
+  </script>
+{% endblock%}
