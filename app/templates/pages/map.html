@@ -45,7 +45,9 @@
         </div>
     </section>
 </div>
-
+<div class="fixed_custom">
+    <h1>Info </h1>
+</div>
 {% endblock %}
 
 {% block right %}
@@ -170,7 +172,7 @@
 
 
     $.ajax({
-        url: 'https://api.agro.uz/gis_bridge/eijara?prefix=' + cad_num,
+        url: '{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num,
         dataType: "json"
     }).always(response => {
 
@@ -199,13 +201,11 @@
         $("#right-table").DataTable({
             "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false
         });
-
+        
         farmers = L.geoJSON(response, {
             style: farmerStyle,
             onEachFeature: function (feature, layer) {
                 layer.on({
-                    mouseover: highlightFeature,
-                    mouseout: resetHighlight,
                     click: zoomToFeature
                 });
 
@@ -215,7 +215,10 @@
                     popupContent += '<tr><td>' + p + '</td><td>' + feature.properties[p] + '</td></tr>';
                 }
                 popupContent += '</table> <a href="{{ url_for('main.map_item')}}">View detail</a>';
-                layer.bindPopup(popupContent);
+                var opt = {
+                    className: "popup-custom",
+                }
+                layer.bindPopup(popupContent, opt);
             }
         })
         farmers.addTo(map)
@@ -225,38 +228,14 @@
     })
 
 
-    function resetHighlight(e) {
-        farmers.resetStyle(e.target);
-    }
-
-
-    function highlightFeature(e) {
-        var layer = e.target;
-
-        layer.setStyle({
-            weight: 5,
-            color: 'blue',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
-
-        if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-            layer.bringToFront();
-        }
-    }
+    
 
     function zoomToFeature(e) {
-        var layer = e.target;
-
-        layer.setStyle({
-            weight: 5,
-            color: 'white',
-            dashArray: '',
-            fillOpacity: 0.7
-        });
-
-        map.fitBounds(e.target.getBounds());
-    }
+            var layer = e.target;
+            farmers.resetStyle()
+            layer.setStyle({color: 'red', weight: '5'})
+            map.fitBounds(e.target.getBounds());
+        }
 
 
     var legend = L.control({ position: 'bottomright' });
@@ -291,7 +270,11 @@
 
 
 
+$(document).ready(function(){
 
+    $('.fixed_custom').animate({opacity: '1'},2000);
+
+});
 
 
 </script>
