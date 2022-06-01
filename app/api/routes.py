@@ -6,7 +6,8 @@ from geoalchemy2.functions import ST_AsGeoJSON
 import json
 api = Blueprint("api",__name__, url_prefix='/api')
 
-
+from .kadastr.routes import kadastr
+api.register_blueprint(kadastr)
 
 @api.route("/district", methods=['GET'])
 @login_required
