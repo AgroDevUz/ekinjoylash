@@ -12,7 +12,7 @@ api.register_blueprint(kadastr)
 @api.route("/district", methods=['GET'])
 @login_required
 def get_district():
-    @cache.memoize(3600)
+    # @cache.memoize(3600)
     def generate_geojson(dist_id):
         dist = District.query.get(dist_id)
         prc = Province.query.get(dist.region_id)
