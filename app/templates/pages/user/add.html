@@ -103,7 +103,7 @@
             success: function(data) {
                 $("#person_district").empty();
                 for (var i in data) {
-                    var dis = "<option value='" + data[i].id + "'> " + data[i].name + " </option>";
+                    var dis = "<option value='" + data[i].id + "'> " + data[i].nameru + " </option>";
                     $("#person_district").append(dis);
                 }
                 $("#person_district").prop( "disabled", false );
