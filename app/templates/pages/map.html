@@ -102,10 +102,7 @@
     const defaultCenter = [42, 64]
     const defaultZoom = 8
     cad_num = "{{data}}";
-    //let cad_num = location.search.split('districts=')[1]
-    // if(!cad_num){
-    //   cad_num = "17:10"
-    //}
+
     const mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
     const mbUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
     const grayscale = L.tileLayer(mbUrl, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
@@ -149,14 +146,12 @@
             const districtsLayer = L.geoJSON(data, {
                 style: districtStyle,
             })
-            console.log(data);
             districtsLayer.addTo(map)
                 .bindTooltip(data['features'][0]['properties']['nameru'],
                     { permanent: true, direction: "center", className: "my-labels" }
                 ).openTooltip()
             map.fitBounds(districtsLayer.getBounds())
             map.spin(true)
-            // console.log(data)
             return data
         }
     })
@@ -214,21 +209,13 @@
                 for (var p in feature.properties) {
                     popupContent += '<tr><td>' + p + '</td><td>' + feature.properties[p] + '</td></tr>';
                 }
-                popupContent += '</table> <a href="{{ url_for('main.map_item')}}">View detail</a>';
-                var opt = {
-                    className: "popup-custom",
-                }
-                layer.bindPopup(popupContent, opt);
+                popupContent += `</table> <br/><a href="/map/item?cadastral_number=${feature.properties.cadastral_number}">View detail</a>`
+                layer.bindPopup(popupContent);
             }
         })
         farmers.addTo(map)
-        console.log(response[0]['features'].length)
-
         map.spin(false)
     })
-
-
-    
 
     function zoomToFeature(e) {
             var layer = e.target;
@@ -237,46 +224,9 @@
             map.fitBounds(e.target.getBounds());
         }
 
-
-    var legend = L.control({ position: 'bottomright' });
-
-    legend.onAdd = function (map) {
-
-        var div = L.DomUtil.create('div', 'info-b legend')
-        div.innerHTML = `
-            <div class="legent_item">
-                  <span style="padding:0 15px; border:1px solid blue; margin: 0 5px"></span> Fermer xo'jaligi
-            </div>
-            <div class="legent_item">
-                  <span style="padding:0 15px; border:1px solid red; margin: 0 5px"></span> Dehqon xo'jaligi
-            </div>
-            <div class="legent_item">
-                  <span style="padding:0 15px; border:1px solid yellow; margin: 0 5px"></span> Dehqon xo'jaligi (auksion)
-            </div>
-            <div class="legent_item">
-                  <span style="padding:0 15px; border:1px solid green; margin: 0 5px"></span> Korxonalarning qishloq xo‘jaligi yerlari
-            </div>
-        `
-
-        return div;
-    };
-
-    legend.addTo(map);
-
-
-
-
-
-
-
-
 $(document).ready(function(){
-
     $('.fixed_custom').animate({opacity: '1'},2000);
-
 });
 
-
 </script>
-
 {% endblock%}
