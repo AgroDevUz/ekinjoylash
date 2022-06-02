@@ -51,7 +51,8 @@ def map():
 @main.route("/map/item")
 @login_required
 def map_item():
-    return render_template('pages/map_item.html')
+    cadastral_number = request.args.get('cadastral_number')
+    return render_template('pages/map_item.html', cadastral_number=cadastral_number)
 
 
 @login_manager.unauthorized_handler
