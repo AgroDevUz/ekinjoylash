@@ -11,8 +11,9 @@ var districtStyle = {
 
 function farmerStyle(feature) {
     return {
-    fillColor: "transparent",
-    color: farmColor(feature.properties.baunit_type),
+    color: "white",
+    dashArray: '3',
+    fillColor: farmColor(feature.properties.baunit_type),
     weight: 1,
     opacity: 1,
     fillOpacity: 0.8
