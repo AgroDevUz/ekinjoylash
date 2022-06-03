@@ -72,4 +72,27 @@ Let’s create a map of the center of London with pretty OpenStreetMap tiles. Fr
     circle.bindPopup("I am a circle.");
     polygon.bindPopup("I am a polygon.");
 
-    
+
+### Using geojson
+
+    Layer = L.geoJSON(geojson_data, {
+            style: {
+                color: "red"
+            },
+            onEachFeature: function (feature, layer) {
+                
+                layer.on({
+                    click: function (e) {
+                    var layer = e.target;
+                    Layer   .resetStyle()
+                    layer.setStyle({color: 'red', weight: '5'})
+                    map.fitBounds(e.target.getBounds());
+                }
+                });
+
+                var popupContent = '<b>Popup template</b>';
+
+                layer.bindPopup(popupContent);
+            }
+        })
+    Layer.addTo(map)
