@@ -58,7 +58,10 @@
 
 {% block js %}
 {{ url_for('static', filename='dist/css/map/style.css')}}
+<link rel="stylesheet" type="text/css"
+  href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.2/leaflet.draw-src.js"></script>
 <script src="{{ url_for('static', filename='dist/js/map/leaflet.spin.min.js')}}"></script>
 <script src="{{ url_for('static', filename='dist/js/map/spin.min.js')}}"></script>
 <script src="{{ url_for('static', filename='dist/js/map/style.js')}}"></script>
@@ -75,16 +78,11 @@
   const grayscale = L.tileLayer(mbUrl, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
   const streets = L.tileLayer(mbUrl, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
   const satellite = L.tileLayer(mbUrl, { id: 'mapbox/satellite-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
-  const googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-    maxZoom: 20,
-    subdomains: ['mt0', 'mt1', 'mt2', 'mt3']
-  });
 
   const baseLayers = {
     'Grayscale': grayscale,
     'Streets': streets,
     'Satellite': satellite,
-    'Satellite (google)': googleSat
   }
 
   const map = L.map('map',
@@ -106,30 +104,87 @@
     },
     success: function (data) {
       const Layer = L.geoJSON(data, {
-
-        onEachFeature: function (feature, layer) {
-          layer.on({
-            click: zoomToFeature
-          });
-
-          var popupContent = `${feature.properties.full_name}`;
-          layer.bindPopup(popupContent)
-        }
+        style: {
+          color: 'red',
+          fillColor: 'transparent',
+          weight: 5,
+        },
+        onEachFeature: function (feature, layer) { }
       });
 
-       Layer.addTo(map)
+      Layer.addTo(map)
 
-          map.fitBounds(Layer.getBounds())
-          map.spin(false)
-          function zoomToFeature(e) {
-            var layer = e.target;
-            Layer.resetStyle()
-            layer.setStyle({color: 'red', weight: '5'})
-            map.fitBounds(e.target.getBounds());
+      map.fitBounds(Layer.getBounds())
+      map.spin(false)
+      return data
+    }
+  })
+
+  var drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
+
+  var options = {
+    position: 'topright',
+    draw: {
+      polygon: {
+        allowIntersection: false, // Restricts shapes to simple polygons
+        drawError: {
+          color: 'blue', // Color the shape will turn when intersects
+          message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+        },
+        shapeOptions: {
+          color: 'red'
         }
-          return data
-      }
-    })
+      },
+      circle: false,
+      circlemarker: false,
+      marker: false,
+      polyline: false,
+      rectangle: false,
+    },
+    edit: {
+      featureGroup: drawnItems, //REQUIRED!!
+      remove: true
+    }
+  };
+  var drawControl = new L.Control.Draw(options);
+
+  map.addControl(drawControl);
+
+  map.on(L.Draw.Event.CREATED, function (e) {
+
+    var type = e.layerType
+    var layer = e.layer;
+    drawnItems.addLayer(layer);
+    var objects = layer.getLatLngs()[0];
+    let geom = [[]]
+    // o.Point {x: 744794.1851014761, y: -5309112.129212381}
+    for (var i = 0; i < objects.length; i++) {
+      var latlng = new L.latLng(objects[i].lat, objects[i].lng);
+      var point = L.Projection.SphericalMercator.project(latlng);
+      console.log(point);
+      // console.log(L.Projection.LonLat.project(latlng));
+      // console.log(L.Projection.Mercator.project(latlng));
+
+      geom[0].push([point['x'], point['y']])
+    }
+    // drawnItems.clearLayers();
+
+    // fetch('http://localhost:1001/save', {
+    //     method: 'POST',
+    //     headers: {
+    //         'Content-Type': 'application/json'
+    //     },
+    //     body: JSON.stringify(geom)
+    // })
+    //     .then(data => {
+    //         // location.reload();
+    //         renderData = null
+    //         addGeoJson()
+    //         // console.log(geom);
+    //     })
+  })
+
 
 
 
