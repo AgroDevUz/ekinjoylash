@@ -63,6 +63,7 @@ class District(db.Model):
     district_prefix = db.Column(db.String, nullable=False)
     geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON", srid=3857), nullable = True)
     users = relationship("User", backref="district", lazy=True)
+    crops = relationship("Crop", backref="district", lazy=True)
     def __repr__(self):
         return "%s (%s)"%(self.nameru,self.district_prefix)
     def format(self):
@@ -100,3 +101,22 @@ class CropName(db.Model):
             'code' : self.code
         }
         
+class Crop(db.Model):
+    __tablename__ = "crop"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=True)
+    area = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON", srid=3857), nullable = True)
+    district_id = db.Column(db.Integer, db.ForeignKey('district.id'), nullable=True)
+    farm_tax_number = db.Column(db.String, nullable=True)
+    farm_cad_number = db.Column(db.String, nullable=True)
+    
+    def format(self):
+        return {
+            "id" : self.id,
+            "name" : self.name,
+            "area" : self.area,
+            "district_name" : self.district.name,
+            "farm_tax_number" : self.farm_tax_number,
+            "farm_cad_number" : self.farm_cad_number
+        }
