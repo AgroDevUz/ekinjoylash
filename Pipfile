@@ -16,6 +16,7 @@ Shapely = "*"
 flask-caching = "*"
 flask-debugtoolbar = "*"
 flask-babelex = "*"
+requests = "*"
 
 [dev-packages]
 autopep8 = "*"

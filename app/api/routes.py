@@ -8,6 +8,8 @@ api = Blueprint("api",__name__, url_prefix='/api')
 
 from .kadastr.routes import kadastr
 api.register_blueprint(kadastr)
+from .crop.routes import crop
+api.register_blueprint(crop)
 
 @api.route("/district", methods=['GET'])
 @login_required
