@@ -43,12 +43,15 @@ def create_app():
         header.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
         return response
     from app.main.admin import MicroBlogModelView, GeoModelView
-    from app.main.models import User, Province, District, Permission, CropName
+    from app.main.models import User, Province, District, Permission, CropName, Crop
     admin.add_view(MicroBlogModelView(User, db.session))
     admin.add_view(GeoModelView(Province, db.session))
     admin.add_view(GeoModelView(District, db.session))
     admin.add_view(MicroBlogModelView(Permission, db.session))
     admin.add_view(MicroBlogModelView(CropName, db.session))
+    admin.add_view(GeoModelView(Crop, db.session))
+    # with app.app_context():
+    #     db.create_all()
 
     return app
     
