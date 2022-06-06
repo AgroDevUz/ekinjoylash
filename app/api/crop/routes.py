@@ -70,7 +70,7 @@ def crop_main():
 def getby_prefix():
     prefix = request.args.get('prefix')
     if not prefix:
-        return jsonify({'msg' : 'error: prefix not defined'})
+        return jsonify({'msg' : 'error: prefix not defined'}), 400
     pr = Province.query.filter_by(region_prefix=str(prefix).split(':')[0]).first()
     dist = District.query.filter_by(region_id=pr.id, district_prefix=str(prefix).split(':')[1]).first()
     print('DIST', dist)
@@ -88,7 +88,7 @@ def getby_prefix():
 def getby_kadastr():
     kadastr = request.args.get('cadastral_number')
     if not kadastr:
-        return jsonify({'msg' : 'error: prefix not defined'})
+        return jsonify({'msg' : 'error: cadastral_number not defined'}), 400
     pr = Province.query.filter_by(region_prefix=str(kadastr).split(':')[0]).first()
     dist = District.query.filter_by(region_id=pr.id, district_prefix=str(kadastr).split(':')[1]).first()
     print('DIST', dist)

@@ -1,7 +1,5 @@
-autopep8
 flask-admin
 flask-babelex
-flask-cache
 flask-caching
 flask-debugtoolbar
 flask-login

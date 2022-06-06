@@ -41,3 +41,7 @@ def get_district():
     
     return jsonify(generate_geojson(current_user.district_id))
 
+@api.route("/", methods=['GET'])
+def main():
+    return jsonify({"msg": "Hello World"})
+
