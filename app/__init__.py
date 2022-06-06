@@ -14,9 +14,9 @@ migrate = Migrate()
 cache = Cache()
 toolbar = DebugToolbarExtension()
 babel = Babel()
-def create_app():
+def create_app(config):
     app = Flask(__name__)
-    app.config.from_pyfile('configs/config.py')
+    app.config.from_pyfile('configs/%s.py'%config)
     login_manager.init_app(app)
     admin.init_app(app)
     db.init_app(app)
