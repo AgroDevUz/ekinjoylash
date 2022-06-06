@@ -193,9 +193,18 @@
 
                 var popupContent = '<table>';
 
-                for (var p in feature.properties) {
-                    popupContent += '<tr><td>' + p + '</td><td>' + feature.properties[p] + '</td></tr>';
-                }
+                    popupContent += '<tr><td>' + 'Suvli sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_with_water + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Suvsiz sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_without_wtr + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Yet turi' + '</td><td>' + feature.properties.baunit_type_title + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Kadastr raqami' + '</td><td>' + feature.properties.cadastral_number + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Nomi' + '</td><td>' + feature.properties.full_name + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Jami maydoni' + '</td><td>' + feature.properties.legal_area + '</td></tr>';
+                    popupContent += '<tr><td>' + 'STIR Raqami' + '</td><td>' + feature.properties.tax_number + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Jami sug\'ariladigan yerlar' + '</td><td>' + feature.properties.total_arable_areas + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Jami q.x. yerlari' + '</td><td>' + feature.properties.total_farmland_areas + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Tuman' + '</td><td>' + feature.properties.tuman + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Viloyat' + '</td><td>' + feature.properties.viloyat + '</td></tr>';
+                    
                 popupContent += `</table> <br/><a href="/map/item?cadastral_number=${feature.properties.cadastral_number}">View detail</a>`
                 layer.bindPopup(popupContent);
             }
