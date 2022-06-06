@@ -91,6 +91,7 @@ class CropName(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     code = db.Column(db.Integer, nullable=False)
+    crops = relationship("Crop", backref="cropname", lazy=True)
     def __repr__(self):
         return "%s (%s)"%(self.name,self.code)
 
@@ -104,7 +105,7 @@ class CropName(db.Model):
 class Crop(db.Model):
     __tablename__ = "crop"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String, nullable=True)
+    crop_id = db.Column(db.Integer, db.ForeignKey('cropname.id'), nullable=True)
     area = db.Column(db.Float, nullable=True)
     geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON", srid=3857), nullable = True)
     district_id = db.Column(db.Integer, db.ForeignKey('district.id'), nullable=True)
@@ -114,7 +115,7 @@ class Crop(db.Model):
     def format(self):
         return {
             "id" : self.id,
-            "name" : self.name,
+            "name" : CropName.query.get(self.crop_id).name,
             "area" : self.area,
             "district_name" : self.district.name,
             "farm_tax_number" : self.farm_tax_number,
