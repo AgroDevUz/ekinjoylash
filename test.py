@@ -155,4 +155,4 @@ def create_dis():
             else:
                 poly = d['geometry']
                 dump = wkt.dumps(poly)
-                if 'MULTI' not in d
+                if 'MULTI' not in du
