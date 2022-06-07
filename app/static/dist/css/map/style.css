@@ -11,14 +11,6 @@
     font-size: 16px;
 }
 
-.legend {
-    line-height: 18px;
-    color: #555;
-}
-.legent_item{
-    margin: 5px;
-}
-
 .info-b {
     padding: 6px 8px;
     font: 14px/16px Arial, Helvetica, sans-serif;
@@ -55,4 +47,21 @@
 
 .leaflet-container .leaflet-popup-content-wrapper table tr {
     width: 200px;
+}
+
+.filter {
+    display: grid;
+}
+
+.filter_item {
+    cursor: pointer;
+    margin: 1%;
+    width: 100%;
+}
+
+.filter_item button {
+    cursor: pointer;
+    width: 100%;
+    background-color: #222222;
+    color: #999999;
 }
