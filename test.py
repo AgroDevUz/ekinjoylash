@@ -144,3 +144,4 @@ def create_user():
         )
         db.session.add(per)
     db.session.commit()
+
