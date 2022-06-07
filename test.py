@@ -140,4 +140,4 @@ def create_user():
         per = Permission(
             user_id = u.id,
             permission = p,
-            value = bool(random.randint(0, 1)
+            value = bool(random.randint(0, 1))
