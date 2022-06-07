@@ -156,4 +156,4 @@ def create_dis():
                 poly = d['geometry']
                 dump = wkt.dumps(poly)
                 if 'MULTI' not in dump:
-                    dump = dump.repla
+                    dump = dump.replac
