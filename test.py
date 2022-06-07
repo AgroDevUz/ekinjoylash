@@ -116,4 +116,4 @@ def write_geoms_dists():
 from models import *
 from routes import PERMISSIONS
 from  geomet import wkt
-impor
+import
