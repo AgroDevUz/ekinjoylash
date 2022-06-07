@@ -1,1 +1,1 @@
-### Include Leaflet CSS file in the hea
+### Include Leaflet CSS file in the head
