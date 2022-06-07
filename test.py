@@ -126,4 +126,4 @@ def create_admin():
     )
     u.set_password('admin')
     db.session.add(u)
-    db.ses
+    db.sess
