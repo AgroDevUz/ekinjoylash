@@ -131,4 +131,4 @@ def create_admin():
 def create_user():
     u = User(
         login = 'qwerty',
-        district_id = District.query.filter_by(name='Qiyichirchiq').firs
+        district_id = District.query.filter_by(name='Qiyichirchiq').first
