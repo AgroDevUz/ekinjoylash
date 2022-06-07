@@ -31,7 +31,6 @@
 
 .leaflet-popup-content-wrapper {
     padding: 2%;
-    width: 400px;
     background-color: #222222;
 }
 
@@ -41,12 +40,7 @@
 }
 
 .leaflet-container .leaflet-popup-content-wrapper table {
-    width: 400px;
     color: #999999;
-}
-
-.leaflet-container .leaflet-popup-content-wrapper table tr {
-    width: 200px;
 }
 
 .filter {
