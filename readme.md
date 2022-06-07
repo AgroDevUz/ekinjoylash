@@ -1,7 +1,8 @@
 # Crop Schedule Application
+
 ![GitHub Pipenv locked Python version](https://img.shields.io/github/pipenv/locked/python-version/AgroDevUZ/ekinjoylash?color=green&label=Python&logo=python&logoColor=white&style=flat-square)
 ![GitHub Pipenv locked dependency version](https://img.shields.io/github/pipenv/locked/dependency-version/AgroDevUz/ekinjoylash/flask?color=green&label=Flask&logo=flask&style=flat-square)
-
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/AgroDevUz/ekinjoylash/Unittest?logo=github&style=flat-square&color=green)
 # Before deploy
 
 ## Flask-Admin
@@ -14,7 +15,7 @@ Search: `self.transform_srid = self.srid`
 
 Before this add this lines: `self.web_srid = self.srid`
 
-```
+```python
 if self.srid == -1:
     self.transform_srid = self.web_srid
 else:

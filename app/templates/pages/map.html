@@ -3,6 +3,7 @@
 {% block title %} Map {% endblock%}
 
 {% block css %}
+
 <link rel="stylesheet"
     href="{{ url_for('static', filename='plugins/datatables-bs4/css/dataTables.bootstrap4.min.css')}}">
 <link rel="stylesheet"
@@ -13,7 +14,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
 <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/map/style.css')}}">
 <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"></script>
+
 <style>
+
     .control-sidebar {
         width: 70vw !important;
         overflow: scroll;
@@ -30,10 +33,10 @@
     #right-table th {
         vertical-align: middle;
     }
+
 </style>
 
 {% endblock %}
-
 
 {% block content %}
 
@@ -45,12 +48,15 @@
         </div>
     </section>
 </div>
+
 <div class="fixed_custom">
     <h1>Info </h1>
 </div>
+
 {% endblock %}
 
 {% block right %}
+
 <div id='right-bar'>
     <table id="right-table" class="table table-bordered">
         <thead>
@@ -67,6 +73,7 @@
                 <th style="width: 50px;"> Jami lalmi ekin yerlari </th>
             </tr>
         </thead>
+
         <tbody id="right-tbody">
 
         </tbody>
@@ -75,8 +82,8 @@
 
 {% endblock %}
 
-
 {% block js %}
+
 {{ url_for('static', filename='dist/css/map/style.css')}}
 <script src="{{ url_for('static', filename='plugins/datatables/jquery.dataTables.min.js')}}"></script>
 <script src="{{ url_for('static', filename='plugins/datatables-bs4/js/dataTables.bootstrap4.min.js')}}"></script>
@@ -91,14 +98,12 @@
 <script src="{{ url_for('static', filename='plugins/datatables-buttons/js/buttons.print.min.js')}}"></script>
 <script src="{{ url_for('static', filename='plugins/datatables-buttons/js/buttons.colVis.min.js')}}"></script>
 
-
-
 <script src="{{ url_for('static', filename='dist/js/map/leaflet.spin.min.js')}}"></script>
 <script src="{{ url_for('static', filename='dist/js/map/spin.min.js')}}"></script>
 <script src="{{ url_for('static', filename='dist/js/map/style.js')}}"></script>
 
-
 <script>
+    
     const defaultCenter = [42, 64]
     const defaultZoom = 8
     cad_num = "{{data}}";
@@ -109,34 +114,32 @@
     const streets = L.tileLayer(mbUrl, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
     const satellite = L.tileLayer(mbUrl, { id: 'mapbox/satellite-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
 
-
     const baseLayers = {
+
         'Grayscale': grayscale,
         'Streets': streets,
         'Satellite': satellite,
-    }
 
+    };
 
     const map = L.map('map',
+
         {
             center: defaultCenter,
             zoom: defaultZoom,
             layers: [satellite]
-        })
+
+        });
 
     var layerControl = L.control.layers(baseLayers).addTo(map);
 
-
-
-
-
-
     $.ajax({
+
         url: '{{ url_for('api.get_district') }}',
         type: 'GET',
         dataType: 'json',
         xhrFields: {
-            withCredentials: true
+            withCredentials: true,
         },
         success: function (data) {
             const districtsLayer = L.geoJSON(data, {
@@ -150,12 +153,15 @@
             map.spin(true)
             return data
         }
-    })
+
+    });
 
 
     $.ajax({
+
         url: '{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num,
         dataType: "json"
+
     }).always(response => {
 
         var t_r = 1;
@@ -179,12 +185,16 @@
             $("#right-tbody").append(it);
             t_r += 1;
 
-        }
+        };
+
         $("#right-table").DataTable({
-            "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false
+
+            "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false,
+
         });
         
         farmers = L.geoJSON(response, {
+
             style: farmerStyle,
             onEachFeature: function (feature, layer) {
                 layer.on({
@@ -193,27 +203,72 @@
 
                 var popupContent = '<table>';
 
-                for (var p in feature.properties) {
-                    popupContent += '<tr><td>' + p + '</td><td>' + feature.properties[p] + '</td></tr>';
-                }
+                    popupContent += '<tr><td>' + 'Suvli sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_with_water + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Suvsiz sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_without_wtr + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Yet turi' + '</td><td>' + feature.properties.baunit_type_title + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Kadastr raqami' + '</td><td>' + feature.properties.cadastral_number + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Nomi' + '</td><td>' + feature.properties.full_name + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Jami maydoni' + '</td><td>' + feature.properties.legal_area + '</td></tr>';
+                    popupContent += '<tr><td>' + 'STIR Raqami' + '</td><td>' + feature.properties.tax_number + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Jami sug\'ariladigan yerlar' + '</td><td>' + feature.properties.total_arable_areas + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Jami q.x. yerlari' + '</td><td>' + feature.properties.total_farmland_areas + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Tuman' + '</td><td>' + feature.properties.tuman + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Viloyat' + '</td><td>' + feature.properties.viloyat + '</td></tr>';
+
                 popupContent += `</table> <br/><a href="/map/item?cadastral_number=${feature.properties.cadastral_number}">View detail</a>`
                 layer.bindPopup(popupContent);
+
             }
-        })
-        farmers.addTo(map)
-        map.spin(false)
-    })
+
+        });
+
+        farmers.addTo(map);
+        map.spin(false);
+
+    });
 
     function zoomToFeature(e) {
-            var layer = e.target;
-            farmers.resetStyle()
-            layer.setStyle({color: 'red', weight: '5'})
-            map.fitBounds(e.target.getBounds());
-        }
 
-$(document).ready(function(){
-    $('.fixed_custom').animate({opacity: '1'},2000);
-});
+        var layer = e.target;
+        farmers.resetStyle()
+        layer.setStyle({color: 'red', weight: '5'})
+        map.fitBounds(e.target.getBounds());
+        
+    };
+
+    $(document).ready(function(){
+
+        $('.fixed_custom').animate({opacity: '1'},2000);
+
+    });
+
+    var filter = L.control({
+        position: 'bottomright'
+    });
+
+    filter.onAdd = function (map) {
+
+        var div = L.DomUtil.create('div', 'filter');
+        div.innerHTML = `
+            <a class="filter_item" href="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=">
+                <button id="returnDehkan">Barcha yerlar</button>
+            </a>
+            <a class="filter_item" href="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan%27">
+                <button id="returnDehkan">Dehqon xo'jaliklari</button>
+            </a>
+            <a class="filter_item" href="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_farm%27">
+                <button id="returnFarm">Fermer xo'jaliklari</button>
+            </a>
+            <a class="filter_item" href="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan_auction%27">
+                <button id="returnDehkanAuction">Zaxira yerlar</button>
+            </a>
+        `;
+
+        return div;
+    };
+
+    filter.addTo(map);
 
 </script>
+
 {% endblock%}
