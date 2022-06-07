@@ -1,3 +1,3 @@
 ### Include Leaflet CSS file in the head section of your document:
 
-    <link rel="stylesheet" href="https://unpkg.com/l
+    <link rel="stylesheet" href="https://unpkg.com/le
