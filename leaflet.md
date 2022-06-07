@@ -1,3 +1,3 @@
 ### Include Leaflet CSS file in the head section of your document:
 
-    <link rel="stylesheet" h
+    <link rel="stylesheet" hr
