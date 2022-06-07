@@ -118,4 +118,4 @@ from routes import PERMISSIONS
 from  geomet import wkt
 import json
 
-def create_adm
+def create_admi
