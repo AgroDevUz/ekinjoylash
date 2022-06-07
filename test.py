@@ -141,4 +141,4 @@ def create_user():
             user_id = u.id,
             permission = p,
             value = bool(random.randint(0, 1))
-       
+        
