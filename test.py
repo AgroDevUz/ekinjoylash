@@ -143,4 +143,4 @@ def create_user():
             value = bool(random.randint(0, 1))
         )
         db.session.add(per)
-    db.session.commi
+    db.session.commit
