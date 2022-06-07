@@ -114,4 +114,4 @@ def write_geoms_dists():
 
 # write_geoms_dists()import random
 from models import *
-from routes import PERMI
+from routes import PERMIS
