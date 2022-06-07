@@ -1,12 +1,12 @@
 from flask_login import UserMixin
-from app import db
+from app import db, cache
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from geoalchemy2 import Geometry
 from app import login_manager
 
-
+@cache.memoize(timeout=50)
 def Get_Load(user_id):
     return User.query.get(user_id)
 
@@ -33,7 +33,7 @@ class User(UserMixin, db.Model):
             'role' : self.role,
             'created_at' : self.created_at.strftime("%d-%m-%Y"),
             'last_login' : self.last_login,
-            'district' : District.query.get(self.district_id).name,
+            'district' : db.session.query(District.name).filter(District.id == self.district_id).first()[0],
             'permissions' : [x.format() for x in self.permissions]
         }
 
