@@ -130,4 +130,4 @@ def create_admin():
 
 def create_user():
     u = User(
-        login = 'q
+        login = 'qw
