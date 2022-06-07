@@ -148,4 +148,4 @@ def create_user():
 def create_dis():
     with open("tuman.json", 'r', encoding='utf8') as f:
         data = json.loads(f.read())
-        for d in dat
+        for d in data
