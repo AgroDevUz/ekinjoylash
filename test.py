@@ -142,4 +142,4 @@ def create_user():
             permission = p,
             value = bool(random.randint(0, 1))
         )
-        db.s
+        db.se
