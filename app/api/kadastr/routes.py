@@ -20,3 +20,14 @@ def getby_kadastr():
     url = 'https://api.agro.uz/gis_bridge/eijara_all?prefix=%s'%(prefix)
     data = requests.get(url)
     return data.text
+
+@kadastr.route('/filter_kadastr')
+def filter_kadastr():
+    prefix = request.args.get('prefix')
+    filters = request.args.get('filters')
+    if not prefix:
+        return jsonify({'msg' : 'error: cadastral number not defined'})
+    url = 'http://localhost:5055/gis_bridge/eijara_filter?prefix=%s&filters=%s'%(prefix, filters)
+    url = 'https://api.agro.uz/gis_bridge/eijara_filter?prefix=%s&filters=%s'%(prefix, filters)
+    data = requests.get(url)
+    return data.text
