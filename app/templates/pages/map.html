@@ -242,6 +242,10 @@
 
     });
 
+    var filter = L.control({
+        position: 'bottomright'
+    });
+
     filter.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'filter');
