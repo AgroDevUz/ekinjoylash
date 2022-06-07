@@ -161,4 +161,4 @@ def create_dis():
                 dist = District(
                     nameru = d['properties']['name'],
                     district_prefix = str(d['properties']['cadastr_num']).split(':')[1],
-                    region_id = Province.query.filter_by(r
+                    region_id = Province.query.filter_by(re
