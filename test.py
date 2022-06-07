@@ -137,4 +137,4 @@ def create_user():
     db.session.add(u)
     db.session.commit()
     for p in PERMISSIONS:
-        per = P
+        per = Pe
