@@ -135,3 +135,4 @@ def create_user():
     )
     u.set_password('qwerty')
     db.session.add(u)
+ 
