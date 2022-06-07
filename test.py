@@ -146,4 +146,4 @@ def create_user():
     db.session.commit()
 
 def create_dis():
-    with open("tuman.json", 'r', encoding='utf8') as
+    with open("tuman.json", 'r', encoding='utf8') as 
