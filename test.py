@@ -131,4 +131,4 @@ def create_admin():
 def create_user():
     u = User(
         login = 'qwerty',
-        district_id = District.q
+        district_id = District.qu
