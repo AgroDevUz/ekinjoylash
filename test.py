@@ -150,4 +150,4 @@ def create_dis():
         data = json.loads(f.read())
         for d in data['features']:
             ds = District.query.filter_by(nameru=d['properties']['name']).first()
-            if
+            if 
