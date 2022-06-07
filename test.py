@@ -147,4 +147,4 @@ def create_user():
 
 def create_dis():
     with open("tuman.json", 'r', encoding='utf8') as f:
-        data = j
+        data = js
