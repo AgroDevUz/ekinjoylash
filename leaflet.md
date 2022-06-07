@@ -1,1 +1,1 @@
-### Include Leaflet CSS file in the head section of your do
+### Include Leaflet CSS file in the head section of your doc
