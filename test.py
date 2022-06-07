@@ -125,4 +125,4 @@ def create_admin():
         district_id = District.query.filter_by(name='Qiyichirchiq').first().id
     )
     u.set_password('admin')
-    db.s
+    db.se
