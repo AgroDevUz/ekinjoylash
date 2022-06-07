@@ -120,4 +120,4 @@ import json
 
 def create_admin():
     u = User(
-        login = 'admi
+        login = 'admin
