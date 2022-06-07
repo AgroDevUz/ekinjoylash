@@ -160,4 +160,4 @@ def create_dis():
                     dump = dump + ")"
                 dist = District(
                     nameru = d['properties']['name'],
-                    district_prefix = str(d['properties']['ca
+                    district_prefix = str(d['properties']['cad
