@@ -138,4 +138,4 @@ def create_user():
     db.session.commit()
     for p in PERMISSIONS:
         per = Permission(
-            us
+            use
