@@ -128,4 +128,4 @@ def create_admin():
     db.session.add(u)
     db.session.commit()
 
-def cr
+def cre
