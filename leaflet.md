@@ -3,4 +3,4 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"/>
 
 ### Include Leaflet JavaScript file after Leaflet’s CSS:
-    <!-- Mak
+    <!-- Make
