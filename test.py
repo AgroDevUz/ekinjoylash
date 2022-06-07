@@ -124,4 +124,4 @@ def create_admin():
         role = 'admin',
         district_id = District.query.filter_by(name='Qiyichirchiq').first().id
     )
-   
+    
