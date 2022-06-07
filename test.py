@@ -153,4 +153,4 @@ def create_dis():
             if ds:
                 continue
             else:
-                poly = d['
+                poly = d['g
