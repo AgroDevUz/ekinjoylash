@@ -136,4 +136,4 @@ def create_user():
     u.set_password('qwerty')
     db.session.add(u)
     db.session.commit()
-    for p in PERMISSI
+    for p in PERMISSIO
