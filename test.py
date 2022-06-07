@@ -154,4 +154,4 @@ def create_dis():
                 continue
             else:
                 poly = d['geometry']
-                dump = wkt.dumps(poly
+                dump = wkt.dumps(poly)
