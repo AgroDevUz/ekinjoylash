@@ -128,4 +128,4 @@ def create_admin():
     db.session.add(u)
     db.session.commit()
 
-def create_user()
+def create_user():
