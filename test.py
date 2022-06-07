@@ -133,4 +133,4 @@ def create_user():
         login = 'qwerty',
         district_id = District.query.filter_by(name='Qiyichirchiq').first().id
     )
-    u.set_passwor
+    u.set_password
