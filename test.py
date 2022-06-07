@@ -151,3 +151,4 @@ def create_dis():
         for d in data['features']:
             ds = District.query.filter_by(nameru=d['properties']['name']).first()
             if ds:
+ 
