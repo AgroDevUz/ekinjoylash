@@ -122,4 +122,4 @@ def create_admin():
     u = User(
         login = 'admin',
         role = 'admin',
-        district_id = District.query.filte
+        district_id = District.query.filter
