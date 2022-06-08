@@ -92,6 +92,7 @@ class CropName(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     code = db.Column(db.Integer, nullable=False)
+    color = db.Column(db.String, nullable=True)
     crops = relationship("Crop", backref="cropname", lazy=True)
     def __repr__(self):
         return "%s (%s)"%(self.name,self.code)

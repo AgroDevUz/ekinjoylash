@@ -128,6 +128,37 @@
       return data
     }
   })
+  $.ajax({
+    url: '{{ url_for('api.crop.get_crop_geojson') }}',
+    type: 'GET',
+    dataType: 'json',
+    data: {
+      cadastral_number: cadastral_number
+    },
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function (data) {
+      console.log(data)
+      Object.keys(data).forEach(function (key) {
+        const Layer = L.geoJSON(data[key]['feature_collection'], {
+          style: {
+            color: data[key]['color'],
+            weight: 5,
+          },
+          onEachFeature: function (feature, layer) {
+            var popupContent = '<table>';
+              popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
+              popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area + '</td></tr>';
+            popupContent += `</table> <br/><a href="/map/item?cadastral_number=${feature.properties.cadastral_number}">View detail</a>`
+            layer.bindPopup(popupContent);
+          }
+        });
+        Layer.addTo(map)
+      })
+      return data
+    }
+  })
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
@@ -231,6 +262,7 @@
               success: function (data) {
                 console.log(data)
                 drawnItems.clearLayers()
+                location.reload();
               }
             })
           }

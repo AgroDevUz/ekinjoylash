@@ -2,7 +2,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_admin import Admin
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from flask_migrate import Migrate, upgrade, migrate as mig, init
 from flask_caching import Cache
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_babelex import Babel
@@ -50,6 +50,9 @@ def create_app(config):
     admin.add_view(MicroBlogModelView(CropName, db.session))
     admin.add_view(GeoModelView(Crop, db.session))
     with app.app_context():
+        # init()
+        # mig()
+        # upgrade()
         db.create_all()
 
     return app
