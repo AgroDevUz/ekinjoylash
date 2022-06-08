@@ -146,7 +146,7 @@
             dataType: "json"
     
         }).always(response => {
-            map.removeLayer(farmers);
+            //map.removeLayer(farmers);
             var t_r = 1;
             console.log("data came");
             $("#right-bar").empty();
@@ -266,10 +266,10 @@
         //var main_url = "{{url_for('api.kadastr.getby_prefix')}}?prefix=" + cad_num;
         div.innerHTML = `
             
-            <button id="returnDehkan" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=">Barcha yerlar</button>
-            <button id="returnDehkan" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan%27">Dehqon xo'jaliklari</button>
-            <button id="returnFarm" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_farm%27" >Fermer xo'jaliklari</button>
-            <button id="returnDehkanAuction" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.43.190:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan_auction%27" >Zaxira yerlar</button>
+            <button id="returnDehkan" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.42.111:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=">Barcha yerlar</button>
+            <button id="returnDehkan" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.42.111:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan%27">Dehqon xo'jaliklari</button>
+            <button id="returnFarm" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.42.111:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_farm%27" >Fermer xo'jaliklari</button>
+            <button id="returnDehkanAuction" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.42.111:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan_auction%27" >Zaxira yerlar</button>
           
         `;
 

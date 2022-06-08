@@ -95,6 +95,12 @@
   var layerControl = L.control.layers(baseLayers).addTo(map);
   map.spin(true)
 
+  var data_temp = {
+    district_id: {{ current_user.district_id }},
+    farm_tax_number: null,
+    farm_cad_number: null,
+  }
+  
   $.ajax({
     url: '{{ url_for('api.kadastr.getby_kadastr') }}?prefix=' + cadastral_number,
     type: 'GET',
@@ -103,6 +109,9 @@
       withCredentials: true
     },
     success: function (data) {
+      data_temp.farm_cad_number = data[0].features[0].properties.cadastral_number
+      data_temp.farm_tax_number = data[0].features[0].properties.tax_number
+      console.log(data_temp)
       const Layer = L.geoJSON(data, {
         style: {
           color: 'red',
@@ -150,24 +159,94 @@
   var drawControl = new L.Control.Draw(options);
 
   map.addControl(drawControl);
-
+  function toWKT(layer) {
+    var lng, lat, coords = [];
+    if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
+        var latlngs = layer.getLatLngs();
+        for (var i = 0; i < latlngs.length; i++) {
+	    	latlngs[i]
+	    	coords.push(latlngs[i].lng + " " + latlngs[i].lat);
+	        if (i === 0) {
+	        	lng = latlngs[i].lng;
+	        	lat = latlngs[i].lat;
+	        }
+	};
+        if (layer instanceof L.Polygon) {
+            return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
+        } else if (layer instanceof L.Polyline) {
+            return "LINESTRING(" + coords.join(",") + ")";
+        }
+    } else if (layer instanceof L.Marker) {
+        return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
+    }
+  }
   map.on(L.Draw.Event.CREATED, function (e) {
 
     var type = e.layerType
     var layer = e.layer;
     drawnItems.addLayer(layer);
-    var objects = layer.getLatLngs()[0];
-    let geom = [[]]
-    // o.Point {x: 744794.1851014761, y: -5309112.129212381}
-    for (var i = 0; i < objects.length; i++) {
-      var latlng = new L.latLng(objects[i].lat, objects[i].lng);
-      var point = L.Projection.SphericalMercator.project(latlng);
-      console.log(point);
-      // console.log(L.Projection.LonLat.project(latlng));
-      // console.log(L.Projection.Mercator.project(latlng));
+    let popupContent = "<div class='save-polygon'><select name='crop_name' required><option hidden disabled selected>Ekinni tanlang</option>"
+    $.ajax({
+      url: '{{ url_for('api.crop.getcrops') }}',
+      type: 'GET',
+      dataType: 'json',
+      xhrFields: {
+        withCredentials: true
+      },
+      success: function (data) {
+        data.forEach(element => {
+          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>"
+        });
+        popupContent += "</select><br><button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>"
+        layer.bindPopup(popupContent).openPopup()
+        /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
+        layer.bindPopup(popupContent).openPopup()*/
+       
+        var objects = layer.getLatLngs()[0];
+        let geom = [[]]
+        // o.Point {x: 744794.1851014761, y: -5309112.129212381}
+        var first = "";
+        for (var i = 0; i < objects.length; i++) {
+          if (i == 0) {
+            first = new L.latLng(objects[i].lat, objects[i].lng);}
 
-      geom[0].push([point['x'], point['y']])
-    }
+          var latlng = new L.latLng(objects[i].lat, objects[i].lng);
+          //var point = L.Projection.SphericalMercator.project(latlng);
+          var point = latlng; 
+          console.log(point);
+          // console.log(L.Projection.LonLat.project(latlng));
+          // console.log(L.Projection.Mercator.project(latlng));
+    
+          geom[0].push([point['lng'], point['lat']])
+        }
+        geom[0].push([first['lng'], first['lat']])
+        console.log(geom)
+        $("#save-polygon-btn").click(function () {
+          let crop_name = $("select[name='crop_name']").val()
+          if (crop_name != null) {
+            let data = {
+              "geom": geom,
+              "crop_name": crop_name,
+              "district_id": data_temp.district_id,
+              "farm_cad_number": data_temp.farm_cad_number,
+              "farm_tax_number": data_temp.farm_tax_number
+            }
+            console.log(data)
+            $.ajax({
+              url: '{{ url_for('api.crop.crop_main') }}',
+              type: 'POST',
+              dataType: 'json',
+              contentType: "application/json; charset=utf-8",
+              data: JSON.stringify(data),
+              success: function (data) {
+                console.log(data)
+                drawnItems.clearLayers()
+              }
+            })
+          }
+        })
+      }
+    })
     // drawnItems.clearLayers();
 
     // fetch('http://localhost:1001/save', {

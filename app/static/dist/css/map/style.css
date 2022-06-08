@@ -45,6 +45,11 @@
     color: #999999;
 }
 
+.leaflet-container .leaflet-popup-content-wrapper .save-polygon {
+    width: 400px;
+    color: #999999;
+}
+
 .leaflet-container .leaflet-popup-content-wrapper table tr {
     width: 200px;
 }

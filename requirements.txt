@@ -1,5 +1,6 @@
 flask-admin
 flask-babelex
+flask-cache
 flask-caching
 flask-debugtoolbar
 flask-login
@@ -9,5 +10,6 @@ geoalchemy2
 geomet
 pip-chill
 psycopg2
+pyproj
 requests
 shapely
