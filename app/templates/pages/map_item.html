@@ -111,7 +111,7 @@
     success: function (data) {
       data_temp.farm_cad_number = data[0].features[0].properties.cadastral_number
       data_temp.farm_tax_number = data[0].features[0].properties.tax_number
-      console.log(data_temp)
+      // console.log(data_temp);
       const Layer = L.geoJSON(data, {
         style: {
           color: 'red',
@@ -226,7 +226,7 @@
         var first = "";
         for (var i = 0; i < objects.length; i++) {
           if (i == 0) {
-            first = new L.latLng(objects[i].lat, objects[i].lng);}
+            first = new L.latLng(objects[i].lat, objects[i].lng)};
 
           var latlng = new L.latLng(objects[i].lat, objects[i].lng);
           //var point = L.Projection.SphericalMercator.project(latlng);
@@ -235,10 +235,16 @@
           // console.log(L.Projection.LonLat.project(latlng));
           // console.log(L.Projection.Mercator.project(latlng));
     
-          geom[0].push([point['lng'], point['lat']])
+          geom[0].push([point['lng'], point['lat']]);
         }
-        geom[0].push([first['lng'], first['lat']])
+        geom[0].push([first['lng'], first['lat']]);
         console.log(geom)
+        document.querySelector('.leaflet-popup-close-button span').addEventListener('click', () => {
+          drawnItems.clearLayers();
+          map.removeControl(drawControl);
+          drawControl = new L.Control.Draw(options);
+          map.addControl(drawControl);
+        })
         $("#save-polygon-btn").click(function () {
           let crop_name = $("select[name='crop_name']").val()
           if (crop_name != null) {
@@ -248,8 +254,8 @@
               "district_id": data_temp.district_id,
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number
-            }
-            console.log(data)
+            };
+            // console.log(data);
             $.ajax({
               url: '{{ url_for('api.crop.crop_main') }}',
               type: 'POST',
@@ -263,12 +269,18 @@
                 console.log(data)
                 drawnItems.clearLayers()
                 location.reload();
+                // console.log(data);
+                /*map.removeControl(drawControl);
+                drawnItems.clearLayers();
+                drawControl = new L.Control.Draw(options);
+                map.addControl(drawControl);*/
               }
             })
           }
         })
       }
     })
+
     // drawnItems.clearLayers();
 
     // fetch('http://localhost:1001/save', {
@@ -285,6 +297,18 @@
     //         // console.log(geom);
     //     })
   })
+
+  map.on(L.Draw.Event.DELETED, function (e) {
+    map.removeControl(drawControl);
+    drawControl = new L.Control.Draw(options);
+    map.addControl(drawControl);
+  });
+
+  // map.on('draw:drawstop', function (e) {
+  //   map.removeControl(drawControl);
+  //   drawControl = new L.Control.Draw(options);
+  //   map.addControl(drawControl);
+  // });
 
 
 
