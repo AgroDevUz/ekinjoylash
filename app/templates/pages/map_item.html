@@ -157,31 +157,18 @@
     }
   };
   var drawControl = new L.Control.Draw(options);
-
   map.addControl(drawControl);
-  function toWKT(layer) {
-    var lng, lat, coords = [];
-    if (layer instanceof L.Polygon || layer instanceof L.Polyline) {
-        var latlngs = layer.getLatLngs();
-        for (var i = 0; i < latlngs.length; i++) {
-	    	latlngs[i]
-	    	coords.push(latlngs[i].lng + " " + latlngs[i].lat);
-	        if (i === 0) {
-	        	lng = latlngs[i].lng;
-	        	lat = latlngs[i].lat;
-	        }
-	};
-        if (layer instanceof L.Polygon) {
-            return "POLYGON((" + coords.join(",") + "," + lng + " " + lat + "))";
-        } else if (layer instanceof L.Polyline) {
-            return "LINESTRING(" + coords.join(",") + ")";
-        }
-    } else if (layer instanceof L.Marker) {
-        return "POINT(" + layer.getLatLng().lng + " " + layer.getLatLng().lat + ")";
-    }
-  }
   map.on(L.Draw.Event.CREATED, function (e) {
-
+    map.removeControl(drawControl);
+    drawControl = new L.Control.Draw({
+      position: 'topright',
+      draw: false,
+      edit: {
+        featureGroup: drawnItems, //REQUIRED!!
+        remove: true
+      }
+    });
+    map.addControl(drawControl);
     var type = e.layerType
     var layer = e.layer;
     drawnItems.addLayer(layer);
@@ -238,6 +225,9 @@
               dataType: 'json',
               contentType: "application/json; charset=utf-8",
               data: JSON.stringify(data),
+              xhrFields: {
+                withCredentials: true
+              },
               success: function (data) {
                 console.log(data)
                 drawnItems.clearLayers()
