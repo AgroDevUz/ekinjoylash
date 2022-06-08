@@ -49,8 +49,8 @@ def create_app(config):
     admin.add_view(MicroBlogModelView(Permission, db.session))
     admin.add_view(MicroBlogModelView(CropName, db.session))
     admin.add_view(GeoModelView(Crop, db.session))
-    # with app.app_context():
-    #     db.create_all()
+    with app.app_context():
+        db.create_all()
 
     return app
     

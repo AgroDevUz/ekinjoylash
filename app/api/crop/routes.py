@@ -5,25 +5,52 @@ from app.main.models import Crop, CropName, District, Province
 from geomet import wkt
 from app import db
 import json
+import pyproj
+from shapely.geometry import shape
+from shapely.geometry.polygon import Polygon
+import shapely.ops as ops
+from functools import partial
 crop = Blueprint("crop",__name__, url_prefix='/crop')
 
 @crop.route("/", methods=['POST', "GET"])
 def crop_main():
     if request.method == 'POST':
-        data = request.get_json()
+        try:
+            data = request.get_json()
+        except Exception as e:
+            return jsonify({"error": str(e)})
+        print(data)
         if not data:
             return jsonify({"error": "No data"}), 400
-        crop_id = data.get('name')
-        area = data.get('area')
-        geometry = data.get('geometry')
+        crop_name = data.get('crop_name')
+        crop_id = CropName.query.filter_by(code=crop_name).first().id
+        geometry = data.get('geom')
+        print(type(geometry), geometry)
+        polygon = Polygon(geometry[0])
+        geom_area = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj(init='EPSG:4326'),
+                pyproj.Proj(
+                    proj='aea',
+                    lat_1=polygon.bounds[1],
+                    lat_2=polygon.bounds[3]
+                )
+            ),
+            polygon)
+        area = geom_area.area / 10000
         district_id = data.get('district_id')
         farm_tax_number = data.get('farm_tax_number')
         farm_cad_number = data.get('farm_cad_number')
-        
+        geometry = {'type': 'MultiPolygon', 'coordinates': [geometry]}
         try:
-            geometry = wkt.dumps(geometry, decimals=4)
+
+            geometry = wkt.dumps(geometry)
+            geometry = "SRID=4326;%s"%geometry
+            # geometry = geometry.replace("GON ", "GON")
+            print(geometry)
         except Exception as E:
-            return jsonify({'error': str(E)})
+            return jsonify({'error': str(E), "key" : "geometry"}), 400
         
         if not District.query.get(district_id):
             return jsonify({'error': 'District not found'})
@@ -40,9 +67,10 @@ def crop_main():
             db.session.add(crop)
             db.session.commit()
         except Exception as E:
+            print(E)
             db.session.rollback()
             return jsonify({'error': str(E)})
-        
+        return jsonify({'success': 'Crop added'})
     crops = db.session.query(ST_AsGeoJSON(Crop.geometry), Crop.crop_id, Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number).all()
     collection = {
         "type": "FeatureCollection",
@@ -94,6 +122,17 @@ def getby_kadastr():
     print('DIST', dist)
     crops = Crop.query.filter(Crop.district_id == dist.id, Crop.farm_cad_number == str(kadastr).split(':')[2]).all()
     print('CROPS', crops)
+    data = []
+    for crop in crops:
+        data.append(crop.format())
+
+    print('CROP DATA', data)
+
+    return jsonify(data)
+
+@crop.route('/getcrops')
+def getcrops():
+    crops = CropName.query.all()
     data = []
     for crop in crops:
         data.append(crop.format())

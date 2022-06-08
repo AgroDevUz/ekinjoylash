@@ -107,7 +107,7 @@ class Crop(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     crop_id = db.Column(db.Integer, db.ForeignKey('cropname.id'), nullable=True)
     area = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON", srid=3857), nullable = True)
+    geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON"), nullable = True)
     district_id = db.Column(db.Integer, db.ForeignKey('district.id'), nullable=True)
     farm_tax_number = db.Column(db.String, nullable=True)
     farm_cad_number = db.Column(db.String, nullable=True)
