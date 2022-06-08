@@ -1,6 +1,6 @@
 import random
-from models import *
-from routes import PERMISSIONS
+from app.main.models import *
+from app.main.routes import PERMISSIONS
 from  geomet import wkt
 import json
 
@@ -105,7 +105,7 @@ def write_geoms_dists():
 
 # db.create_all()
 # db.drop_all()
-# District.__table__.create(db.session.bind)
+District.__table__.create(db.session.bind)
 # create_prs()
 # create_dis()
 # create_admin()

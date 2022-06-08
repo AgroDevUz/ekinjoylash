@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_remembered, login_required
 
 from geoalchemy2.functions import ST_AsGeoJSON
 from app.main.models import Crop, CropName, District, Province
@@ -13,6 +14,7 @@ from functools import partial
 crop = Blueprint("crop",__name__, url_prefix='/crop')
 
 @crop.route("/", methods=['POST', "GET"])
+@login_required
 def crop_main():
     if request.method == 'POST':
         try:
@@ -61,7 +63,8 @@ def crop_main():
             geometry = geometry,
             district_id = district_id,
             farm_tax_number = farm_tax_number,
-            farm_cad_number = farm_cad_number
+            farm_cad_number = farm_cad_number,
+            user_id = current_user.id
         )
         try:
             db.session.add(crop)
@@ -71,12 +74,12 @@ def crop_main():
             db.session.rollback()
             return jsonify({'error': str(E)})
         return jsonify({'success': 'Crop added'})
-    crops = db.session.query(ST_AsGeoJSON(Crop.geometry), Crop.crop_id, Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number).all()
+    crops = db.session.query(ST_AsGeoJSON(Crop.geometry), Crop.crop_id, Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at).all()
     collection = {
         "type": "FeatureCollection",
         "features": []
         }
-    for crop_geo, crop_name, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number in crops:
+    for crop_geo, crop_name, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at in crops:
         
         
         feature = {
@@ -89,7 +92,10 @@ def crop_main():
             'area': crop_area,
             'district_id': crop_district_id,
             'farm_tax_number': crop_farm_tax_number,
-            'farm_cad_number': crop_farm_cad_number
+            'farm_cad_number': crop_farm_cad_number,
+            'user_id': user_id,
+            'created_at': created_at,
+            'updated_at': updated_at
         }
         collection['features'].append(feature)
     return jsonify(collection)
