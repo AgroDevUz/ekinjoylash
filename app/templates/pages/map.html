@@ -245,13 +245,7 @@
 
         $('.fixed_custom').animate({opacity: '1'},2000);
         render_map('{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num);
-
-    
-        for (let x = 0; x < farmers._layers.length; x++) {
-            if (farmers._layers[x].feature.properties.cadastral_number === '13:06:000243904') {
-                console.log(farmers._layers[x]);
-            }
-        }
+        
     });
 
     var filter = L.control({
@@ -268,7 +262,6 @@
     filter.onAdd = function (map) {
 
         var div = L.DomUtil.create('div', 'filter');
-        //var main_url = "{{url_for('api.kadastr.getby_prefix')}}?prefix=" + cad_num;
         div.innerHTML = `
             
             <button id="returnAll" onclick="click_filter(this)" class="filter_item" data-url="http://192.168.43.174:1425/api/kadastr/filter_kadastr?prefix=${cad_num}&filters=">Barcha yerlar</button>
