@@ -113,3 +113,16 @@ District.__table__.create(db.session.bind)
 # create_user()
 
 # write_geoms_dists()import random
+from models import *
+from routes import PERMISSIONS
+from  geomet import wkt
+import json
+
+def create_admin():
+    u = User(
+        login = 'admin',
+        role = 'admin',
+        district_id = District.query.filter_by(name='Qiyichirchiq').first().id
+    )
+    u.set_password('admin')
+  i
