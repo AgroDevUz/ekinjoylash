@@ -146,3 +146,42 @@ def getcrops():
     print('CROP DATA', data)
 
     return jsonify(data)
+
+@crop.route('/get-crop-geojson')
+def get_crop_geojson():
+    # crops = Crop.query.all()
+    crop_names = CropName.query.all()
+    crops = {}
+    for crop_name in crop_names:
+        crops[crop_name.code] = {
+            'name': crop_name.name,
+            'color': crop_name.color,
+            'feature_collection': {
+                'type': "FeatureCollection",
+                'features': []
+            }
+        }
+    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at).filter(Crop.farm_cad_number==request.args.get('cadastral_number')).all()
+    collection = {
+        "type": "FeatureCollection",
+        "features": []
+    }
+    for crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at in crops_obj:
+
+        feature = {
+            "type": "Feature"
+        }
+        crop_geo = json.loads(crop_geo)
+        feature['geometry'] = crop_geo
+        feature['properties'] = {
+            'area': crop_area,
+            'district_id': crop_district_id,
+            'farm_tax_number': crop_farm_tax_number,
+            'farm_cad_number': crop_farm_cad_number,
+            'user_id': user_id,
+            'created_at': created_at,
+            'updated_at': updated_at
+        }
+        code = CropName.query.get(int(crop_id)).code
+        crops[code]['feature_collection']['features'].append(feature)
+    return jsonify(crops)

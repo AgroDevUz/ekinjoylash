@@ -124,6 +124,37 @@
       Layer.addTo(map)
 
       map.fitBounds(Layer.getBounds())
+      return data
+    }
+  })
+  $.ajax({
+    url: '{{ url_for('api.crop.get_crop_geojson') }}',
+    type: 'GET',
+    dataType: 'json',
+    data: {
+      cadastral_number: cadastral_number
+    },
+    xhrFields: {
+      withCredentials: true
+    },
+    success: function (data) {
+      console.log(data)
+      Object.keys(data).forEach(function (key) {
+        const Layer = L.geoJSON(data[key]['feature_collection'], {
+          style: {
+            color: data[key]['color'],
+            weight: 5,
+          },
+          onEachFeature: function (feature, layer) {
+            var popupContent = '<table>';
+              popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
+              popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area + '</td></tr>';
+            popupContent += `</table>`
+            layer.bindPopup(popupContent);
+          }
+        });
+        Layer.addTo(map)
+      })
       map.spin(false)
       return data
     }
@@ -235,11 +266,14 @@
                 withCredentials: true
               },
               success: function (data) {
+                console.log(data)
+                drawnItems.clearLayers()
+                location.reload();
                 // console.log(data);
-                map.removeControl(drawControl);
+                /*map.removeControl(drawControl);
                 drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
-                map.addControl(drawControl);
+                map.addControl(drawControl);*/
               }
             })
           }
