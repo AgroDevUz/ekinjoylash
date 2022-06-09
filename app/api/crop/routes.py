@@ -44,6 +44,8 @@ def crop_main():
         district_id = data.get('district_id')
         farm_tax_number = data.get('farm_tax_number')
         farm_cad_number = data.get('farm_cad_number')
+        ball_bonitet = data.get('ball_bonitet')
+        contour_number = data.get('contour_number')
         geometry = {'type': 'MultiPolygon', 'coordinates': [geometry]}
         try:
 
@@ -64,7 +66,9 @@ def crop_main():
             district_id = district_id,
             farm_tax_number = farm_tax_number,
             farm_cad_number = farm_cad_number,
-            user_id = current_user.id
+            user_id = current_user.id,
+            ball_bonitet = ball_bonitet,
+            contour_number = contour_number
         )
         try:
             db.session.add(crop)
@@ -74,12 +78,12 @@ def crop_main():
             db.session.rollback()
             return jsonify({'error': str(E)})
         return jsonify({'success': 'Crop added'})
-    crops = db.session.query(ST_AsGeoJSON(Crop.geometry), Crop.crop_id, Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at).all()
+    crops = db.session.query(ST_AsGeoJSON(Crop.geometry), Crop.crop_id, Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.ball_bonitet, Crop.contour_number).all()
     collection = {
         "type": "FeatureCollection",
         "features": []
         }
-    for crop_geo, crop_name, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at in crops:
+    for crop_geo, crop_name, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number in crops:
         
         
         feature = {
@@ -95,7 +99,9 @@ def crop_main():
             'farm_cad_number': crop_farm_cad_number,
             'user_id': user_id,
             'created_at': created_at,
-            'updated_at': updated_at
+            'updated_at': updated_at,
+            'ball_bonitet': ball_bonitet,
+            'contour_number': contour_number
         }
         collection['features'].append(feature)
     return jsonify(collection)
@@ -161,12 +167,12 @@ def get_crop_geojson():
                 'features': []
             }
         }
-    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at).filter(Crop.farm_cad_number==request.args.get('cadastral_number')).all()
+    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.ball_bonitet, Crop.contour_number).filter(Crop.farm_cad_number==request.args.get('cadastral_number')).all()
     collection = {
         "type": "FeatureCollection",
         "features": []
     }
-    for crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at in crops_obj:
+    for crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number in crops_obj:
 
         feature = {
             "type": "Feature"
@@ -180,7 +186,9 @@ def get_crop_geojson():
             'farm_cad_number': crop_farm_cad_number,
             'user_id': user_id,
             'created_at': created_at,
-            'updated_at': updated_at
+            'updated_at': updated_at,
+            'ball_bonitet': ball_bonitet,
+            'contour_number': contour_number
         }
         code = CropName.query.get(int(crop_id)).code
         crops[code]['feature_collection']['features'].append(feature)

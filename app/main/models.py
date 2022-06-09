@@ -116,6 +116,8 @@ class Crop(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime,default=datetime.now, nullable=True)
+    ball_bonitet = db.Column(db.Float, nullable=True)
+    contour_number = db.Column(db.Integer, nullable=True)
 
     def format(self):
         return {
@@ -127,5 +129,7 @@ class Crop(db.Model):
             "farm_cad_number" : self.farm_cad_number,
             "user_id" : self.user_id,
             "created_at" : self.created_at,
-            "updated_at" : self.updated_at
+            "updated_at" : self.updated_at,
+            "ball_bonitet" : self.ball_bonitet,
+            "contour_number" : self.contour_number
         }
