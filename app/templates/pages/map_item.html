@@ -148,12 +148,15 @@
             weight: 3,
           },
           onEachFeature: function (feature, layer) {
+            console.log(feature.properties);
             var popupContent = '<table>';
               popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
+              popupContent += '<tr><td>' + 'Counter Number' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
+              popupContent += '<tr><td>' + 'Ball Bonitet' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
               popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
             popupContent += `</table>`;
             layer.bindPopup(popupContent);
-            console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
+            // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
           }
         });
         Layer.addTo(map);
@@ -208,6 +211,8 @@
     drawnItems.addLayer(layer);
     let popupContent = `
     <div class='save-polygon'>
+      <input name='contour_number'><label for='contour_number'>Counter Number</label>
+      <input name='ball_bonitet'><label for='ball_bonitet'>Ball Bonitet</label>
       <select name='crop_name' required>
         <option hidden disabled selected>Ekinni tanlang</option>`
     $.ajax({
@@ -218,11 +223,13 @@
         withCredentials: true,
       },
       success: function (data) {
-        console.log(data);
+        // console.log(data);
         data.forEach(element => {
           popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
         });
-        popupContent += "</select><br><button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
+        popupContent += "</select>";
+        popupContent += "<label for='crop_name'>Ekin Nomi</label>";
+        popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
         layer.bindPopup(popupContent).openPopup();
         /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
         layer.bindPopup(popupContent).openPopup()*/
@@ -238,14 +245,14 @@
           var latlng = new L.latLng(objects[i].lat, objects[i].lng);
           //var point = L.Projection.SphericalMercator.project(latlng);
           var point = latlng; 
-          console.log(point);
+          // console.log(point);
           // console.log(L.Projection.LonLat.project(latlng));
           // console.log(L.Projection.Mercator.project(latlng));
     
           geom[0].push([point['lng'], point['lat']]);
         }
         geom[0].push([first['lng'], first['lat']]);
-        console.log(geom);
+        // console.log(geom);
         document.querySelector('.leaflet-popup-close-button span').addEventListener('click', () => {
           drawnItems.clearLayers();
           map.removeControl(drawControl);
@@ -254,10 +261,14 @@
         });
         $("#save-polygon-btn").click(function () {
           let crop_name = $("select[name='crop_name']").val();
-          if (crop_name != null) {
+          let contour_number = $("input[name='contour_number']").val();
+          let ball_bonitet = $("input[name='ball_bonitet']").val();
+          if (crop_name != null && contour_number != null && ball_bonitet != null) {
             let data = {
               "geom": geom,
               "crop_name": crop_name,
+              "contour_number": contour_number,
+              "ball_bonitet": ball_bonitet,
               "district_id": data_temp.district_id,
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
