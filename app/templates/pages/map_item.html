@@ -68,8 +68,8 @@
 
 
 <script>
-  const defaultCenter = [42, 64]
-  const defaultZoom = 10
+  const defaultCenter = [42, 64];
+  const defaultZoom = 10;
   let cadastral_number = "{{cadastral_number}}";
 
   const mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
@@ -89,76 +89,79 @@
     {
       center: defaultCenter,
       zoom: defaultZoom,
-      layers: [satellite]
-    })
+      layers: [satellite],
+    });
 
   var layerControl = L.control.layers(baseLayers).addTo(map);
-  map.spin(true)
+  map.spin(true);
 
   var data_temp = {
     district_id: {{ current_user.district_id }},
     farm_tax_number: null,
     farm_cad_number: null,
-  }
+  };
   
   $.ajax({
     url: '{{ url_for('api.kadastr.getby_kadastr') }}?prefix=' + cadastral_number,
     type: 'GET',
     dataType: 'json',
     xhrFields: {
-      withCredentials: true
+      withCredentials: true,
     },
     success: function (data) {
-      data_temp.farm_cad_number = data[0].features[0].properties.cadastral_number
-      data_temp.farm_tax_number = data[0].features[0].properties.tax_number
-      // console.log(data_temp);
+      data_temp.farm_cad_number = data[0].features[0].properties.cadastral_number;
+      data_temp.farm_tax_number = data[0].features[0].properties.tax_number;
+      
       const Layer = L.geoJSON(data, {
         style: {
           color: 'red',
           fillColor: 'transparent',
-          weight: 5,
+          weight: 2,
         },
-        onEachFeature: function (feature, layer) { }
+        onEachFeature: function (feature, layer) {  
+          layer.options.interactive = false;
+         },
       });
 
-      Layer.addTo(map)
+      Layer.addTo(map);
 
-      map.fitBounds(Layer.getBounds())
-      return data
+      map.fitBounds(Layer.getBounds());
+      return data;
     }
-  })
+  });
   $.ajax({
     url: '{{ url_for('api.crop.get_crop_geojson') }}',
     type: 'GET',
     dataType: 'json',
     data: {
-      cadastral_number: cadastral_number
+      cadastral_number: cadastral_number,
     },
     xhrFields: {
-      withCredentials: true
+      withCredentials: true,
     },
     success: function (data) {
-      console.log(data)
+      console.log(data);
       Object.keys(data).forEach(function (key) {
         const Layer = L.geoJSON(data[key]['feature_collection'], {
           style: {
             color: data[key]['color'],
-            weight: 5,
+            weight: 3,
           },
           onEachFeature: function (feature, layer) {
             var popupContent = '<table>';
               popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
-              popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area + '</td></tr>';
-            popupContent += `</table>`
+              popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
+            popupContent += `</table>`;
             layer.bindPopup(popupContent);
+            console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
           }
         });
-        Layer.addTo(map)
+        Layer.addTo(map);
       })
-      map.spin(false)
-      return data
+      map.spin(false);
+      return data;
     }
-  })
+  });
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
@@ -170,10 +173,10 @@
         allowIntersection: false, // Restricts shapes to simple polygons
         drawError: {
           color: 'blue', // Color the shape will turn when intersects
-          message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+          message: '<strong>Oh snap!<strong> you can\'t draw that!', // Message that will show when intersect
         },
         shapeOptions: {
-          color: 'red'
+          color: 'red',
         }
       },
       circle: false,
@@ -184,7 +187,7 @@
     },
     edit: {
       featureGroup: drawnItems, //REQUIRED!!
-      remove: true
+      remove: true,
     }
   };
   var drawControl = new L.Control.Draw(options);
@@ -196,32 +199,36 @@
       draw: false,
       edit: {
         featureGroup: drawnItems, //REQUIRED!!
-        remove: true
+        remove: true,
       }
     });
     map.addControl(drawControl);
-    var type = e.layerType
+    var type = e.layerType;
     var layer = e.layer;
     drawnItems.addLayer(layer);
-    let popupContent = "<div class='save-polygon'><select name='crop_name' required><option hidden disabled selected>Ekinni tanlang</option>"
+    let popupContent = `
+    <div class='save-polygon'>
+      <select name='crop_name' required>
+        <option hidden disabled selected>Ekinni tanlang</option>`
     $.ajax({
       url: '{{ url_for('api.crop.getcrops') }}',
       type: 'GET',
       dataType: 'json',
       xhrFields: {
-        withCredentials: true
+        withCredentials: true,
       },
       success: function (data) {
+        console.log(data);
         data.forEach(element => {
-          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>"
+          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
         });
-        popupContent += "</select><br><button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>"
-        layer.bindPopup(popupContent).openPopup()
+        popupContent += "</select><br><button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
+        layer.bindPopup(popupContent).openPopup();
         /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
         layer.bindPopup(popupContent).openPopup()*/
        
         var objects = layer.getLatLngs()[0];
-        let geom = [[]]
+        let geom = [[]];
         // o.Point {x: 744794.1851014761, y: -5309112.129212381}
         var first = "";
         for (var i = 0; i < objects.length; i++) {
@@ -238,22 +245,22 @@
           geom[0].push([point['lng'], point['lat']]);
         }
         geom[0].push([first['lng'], first['lat']]);
-        console.log(geom)
+        console.log(geom);
         document.querySelector('.leaflet-popup-close-button span').addEventListener('click', () => {
           drawnItems.clearLayers();
           map.removeControl(drawControl);
           drawControl = new L.Control.Draw(options);
           map.addControl(drawControl);
-        })
+        });
         $("#save-polygon-btn").click(function () {
-          let crop_name = $("select[name='crop_name']").val()
+          let crop_name = $("select[name='crop_name']").val();
           if (crop_name != null) {
             let data = {
               "geom": geom,
               "crop_name": crop_name,
               "district_id": data_temp.district_id,
               "farm_cad_number": data_temp.farm_cad_number,
-              "farm_tax_number": data_temp.farm_tax_number
+              "farm_tax_number": data_temp.farm_tax_number,
             };
             // console.log(data);
             $.ajax({
@@ -263,14 +270,15 @@
               contentType: "application/json; charset=utf-8",
               data: JSON.stringify(data),
               xhrFields: {
-                withCredentials: true
+                withCredentials: true,
               },
               success: function (data) {
-                console.log(data)
-                drawnItems.clearLayers()
+                map.spin(false);
+                console.log(data);
+                drawnItems.clearLayers();
                 location.reload();
                 // console.log(data);
-                /*map.removeControl(drawControl);
+                /* map.removeControl(drawControl);
                 drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
                 map.addControl(drawControl);*/
@@ -303,15 +311,6 @@
     drawControl = new L.Control.Draw(options);
     map.addControl(drawControl);
   });
-
-  // map.on('draw:drawstop', function (e) {
-  //   map.removeControl(drawControl);
-  //   drawControl = new L.Control.Draw(options);
-  //   map.addControl(drawControl);
-  // });
-
-
-
 
 </script>
 {% endblock%}
