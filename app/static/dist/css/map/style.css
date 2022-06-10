@@ -70,3 +70,16 @@
     background-color: #222222;
     color: #999999;
 }
+
+.leaflet-popup-content-wrapper {
+    min-width: 300px;
+}
+
+.leaflet-popup-content {
+    min-width: 100%;
+}
+
+.leaflet-popup-content table tr {
+    display: inline-grid;
+    grid-template-columns: 50% 50%;
+}
