@@ -236,7 +236,7 @@
 
         var layer = e.target;
         farmers.resetStyle()
-        layer.setStyle({color: 'red', weight: '5'})
+        layer.setStyle({color: 'red', weight: '3'})
         map.fitBounds(e.target.getBounds());
         
     };
@@ -245,7 +245,7 @@
 
         $('.fixed_custom').animate({opacity: '1'},2000);
         render_map('{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num);
-        
+
     });
 
     var filter = L.control({
