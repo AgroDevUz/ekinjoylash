@@ -90,7 +90,7 @@
       center: defaultCenter,
       zoom: defaultZoom,
       layers: [satellite],
-    })
+    });
 
   var layerControl = L.control.layers(baseLayers).addTo(map);
   map.spin(true);
@@ -111,7 +111,7 @@
     success: function (data) {
       data_temp.farm_cad_number = data[0].features[0].properties.cadastral_number;
       data_temp.farm_tax_number = data[0].features[0].properties.tax_number;
-      // console.log(data_temp);
+      
       const Layer = L.geoJSON(data, {
         style: {
           color: 'red',
@@ -119,7 +119,7 @@
           weight: 2,
         },
         onEachFeature: function (feature, layer) {  
-          layer.options.interactive = false,
+          layer.options.interactive = false;
          },
       });
 
@@ -127,7 +127,7 @@
 
       map.fitBounds(Layer.getBounds());
       return data;
-    },
+    }
   });
   $.ajax({
     url: '{{ url_for('api.crop.get_crop_geojson') }}',
@@ -206,8 +206,10 @@
     var type = e.layerType;
     var layer = e.layer;
     drawnItems.addLayer(layer);
-    let popupContent = `<div class='save-polygon'>
-      <select name='crop_name' required><option hidden disabled selected>Ekinni tanlang</option>`
+    let popupContent = `
+    <div class='save-polygon'>
+      <select name='crop_name' required>
+        <option hidden disabled selected>Ekinni tanlang</option>`
     $.ajax({
       url: '{{ url_for('api.crop.getcrops') }}',
       type: 'GET',
@@ -309,15 +311,6 @@
     drawControl = new L.Control.Draw(options);
     map.addControl(drawControl);
   });
-
-  // map.on('draw:drawstop', function (e) {
-  //   map.removeControl(drawControl);
-  //   drawControl = new L.Control.Draw(options);
-  //   map.addControl(drawControl);
-  // });
-
-
-
 
 </script>
 {% endblock%}
