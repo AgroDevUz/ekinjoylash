@@ -41,7 +41,15 @@
   <!-- Content Header (Page header) -->
   <section class="content-header">
     <div class="container-fluid">
-      <div id="map"> </div>
+      <div class="row">
+        <div style="width: 70%">
+          <div id="map"> </div>
+        </div>
+        <div style="width: 30%">
+          <table id="farm-table" class="table table-bordered">
+          </table>
+        </div>
+      </div>
     </div>
   </section>
 </div>
@@ -121,9 +129,23 @@
       withCredentials: true,
     },
     success: function (data) {
-
-      data_temp.farm_cad_number = data[0].features[0].properties.cadastral_number;
-      data_temp.farm_tax_number = data[0].features[0].properties.tax_number;
+      const properties = data[0].features[0].properties
+      data_temp.farm_cad_number = properties.cadastral_number;
+      data_temp.farm_tax_number = properties.tax_number;
+      Object.keys(properties).forEach(function (key) {
+        $("#farm-table").append(
+          "<tr>" +
+          "<td>" + key + "</td>" +
+          "<td>" + properties[key] + "</td>" +
+          "</tr>"
+        );
+      });
+      $("#farm-table").parent().css({
+        "max-height": "90vh",
+        "overflow-x": "hidden",
+        "overflow-y": "scroll",
+        "word-break": "break-word"
+      })
       
       const Layer = L.geoJSON(data, {
         style: {
