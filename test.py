@@ -133,4 +133,4 @@ from  geomet import wkt
 import json
 
 def create_admin():
-    u = Us
+    u = Use
