@@ -132,4 +132,4 @@ from app.main.routes import PERMISSIONS
 from  geomet import wkt
 import json
 
-def create_ad
+def create_adm
