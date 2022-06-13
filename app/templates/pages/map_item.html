@@ -162,8 +162,9 @@
       <table id="right-table" class="table table-bordered">
           <thead>
               <tr>
+                  <th> № </th>
                   <th> Yer maydoni </th>
-                  <th> Turi </th>
+                  <th> Ekin turi </th>
                   <th> Ball bonitet </th>
                   <th> Contour Number </th>
                   <th> Fermer kadastr raqami </th>
@@ -194,14 +195,15 @@
               popupContent += '<tr><td>' + 'Ball Bonitet' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
               popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
             popupContent += `</table>`;
-            
+            ;
             layer.bindPopup(popupContent);
             // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
 
             var it = `<tr>
             
               <td class="text-center" >${t_r} </td>
-              <td> ${feature.properties.area} </td>
+              <td> ${parseFloat(feature.properties.area).toFixed(2)} ga</td>
+              <td> ${feature.properties.cropname} </td>
               <td> ${feature.properties.ball_bonitet} </td>
               <td> ${feature.properties.contour_number} </td>
               <td> ${feature.properties.farm_cad_number} </td>
