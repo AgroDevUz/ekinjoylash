@@ -127,4 +127,4 @@ def create_admin():
     u.set_password('admin')
   i
 import random
-from app.main.m
+from app.main.mo
