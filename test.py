@@ -126,3 +126,4 @@ def create_admin():
     )
     u.set_password('admin')
   i
+i
