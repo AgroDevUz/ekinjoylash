@@ -196,3 +196,28 @@ def get_crop_geojson():
         code = CropName.query.get(int(crop_id)).code
         crops[code]['feature_collection']['features'].append(feature)
     return jsonify(crops)
+
+@crop.route("/calc-area", methods=['POST'])
+def calc_area():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+        except Exception as e:
+            return jsonify({"error": str(e)})
+        geometry = data.get('geom')
+        print(type(geometry))
+        polygon = Polygon(geometry[0])
+        geom_area = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj(init='EPSG:4326'),
+                pyproj.Proj(
+                    proj='aea',
+                    lat_1=polygon.bounds[1],
+                    lat_2=polygon.bounds[3]
+                )
+            ),
+            polygon)
+        area = geom_area.area / 10000
+        return jsonify({"area": area})
+    return jsonify({"error": "Method not allowed"}), 405
