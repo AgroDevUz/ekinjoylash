@@ -128,4 +128,4 @@ def create_admin():
   i
 import random
 from app.main.models import *
-from app.main.routes import PERMI
+from app.main.routes import PERMIS
