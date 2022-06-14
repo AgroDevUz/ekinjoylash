@@ -345,7 +345,7 @@
       <select name='crop_name' required>
         <option hidden disabled selected>Ekinni tanlang</option>`
     $.ajax({
-      url: '{{ url_for('api.crop.getcrops') }}',
+      url: '{{ url_for('api.crop.get_select_data') }}',
       type: 'GET',
       dataType: 'json',
       xhrFields: {
