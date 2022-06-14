@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_remembered, login_required
 
 from geoalchemy2.functions import ST_AsGeoJSON
-from app.main.models import Crop, CropName, District, Province
+from app.main.models import Crop, CropName, District, LandType, PlantingMethod, PlantingType, Province
 from geomet import wkt
 from app import db
 import json
@@ -44,14 +44,16 @@ def crop_main():
         district_id = data.get('district_id')
         farm_tax_number = data.get('farm_tax_number')
         farm_cad_number = data.get('farm_cad_number')
-        ball_bonitet = data.get('ball_bonitet')
+        productivity = data.get('productivity')
         contour_number = data.get('contour_number')
+        land_type_id = data.get('land_type_id')
+        planting_type_id = data.get('planting_type_id')
+        planting_method_id = data.get('planting_method_id')
         geometry = {'type': 'MultiPolygon', 'coordinates': [geometry]}
         try:
 
             geometry = wkt.dumps(geometry)
             geometry = "SRID=4326;%s"%geometry
-            # geometry = geometry.replace("GON ", "GON")
             print(geometry)
         except Exception as E:
             return jsonify({'error': str(E), "key" : "geometry"}), 400
@@ -67,8 +69,11 @@ def crop_main():
             farm_tax_number = farm_tax_number,
             farm_cad_number = farm_cad_number,
             user_id = current_user.id,
-            ball_bonitet = ball_bonitet,
-            contour_number = contour_number
+            productivity = productivity,
+            contour_number = contour_number,
+            land_type_id = land_type_id,
+            planting_type_id = planting_type_id,
+            planting_method_id = planting_method_id
         )
         try:
             db.session.add(crop)
@@ -142,17 +147,6 @@ def getby_kadastr():
 
     return jsonify(data)
 
-@crop.route('/getcrops')
-def getcrops():
-    crops = CropName.query.all()
-    data = []
-    for crop in crops:
-        data.append(crop.format())
-
-    print('CROP DATA', data)
-
-    return jsonify(data)
-
 @crop.route('/get-crop-geojson')
 def get_crop_geojson():
     # crops = Crop.query.all()
@@ -167,8 +161,11 @@ def get_crop_geojson():
                 'features': []
             }
         }
-    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.ball_bonitet, Crop.contour_number, CropName.name)\
+    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.productivity, Crop.contour_number, CropName.name, Crop.land_type_id, Crop.planting_type_id, Crop.planting_method_id)\
         .join(CropName, CropName.id == Crop.crop_id)\
+        .join(LandType, LandType.id == Crop.land_type_id)\
+        .join(PlantingType, PlantingType.id == Crop.planting_type_id)\
+        .join(PlantingMethod, PlantingMethod.id == Crop.planting_method_id)\
         .filter(Crop.farm_cad_number==request.args.get('cadastral_number')).all()
     collection = {
         "type": "FeatureCollection",
@@ -196,3 +193,63 @@ def get_crop_geojson():
         code = CropName.query.get(int(crop_id)).code
         crops[code]['feature_collection']['features'].append(feature)
     return jsonify(crops)
+
+@crop.route('/get-select-data')
+def get_select_data():
+    data = {
+        'crops': [],
+        'land_types': [],
+        'planting_types': [],
+        'planting_methods': [],
+    }
+    crops = CropName.query.all()
+    for crop in crops:
+        data['crops'].append({
+            'id': crop.code,
+            'name': crop.name,
+        })
+    land_types = LandType.query.all()
+    for land_type in land_types:
+        data['land_types'].append({
+            'id': land_type.id,
+            'name': land_type.name,
+        })
+    planting_types = PlantingType.query.all()
+    for planting_type in planting_types:
+        data['planting_types'].append({
+            'id': planting_type.id,
+            'name': planting_type.name,
+        })
+    planting_methods = PlantingMethod.query.all()
+    for planting_method in planting_methods:
+        data['planting_methods'].append({
+            'id': planting_method.id,
+            'name': planting_method.name,
+        })
+
+    return jsonify(data)
+
+@crop.route("/calc-area", methods=['POST'])
+def calc_area():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+        except Exception as e:
+            return jsonify({"error": str(e)})
+        geometry = data.get('geom')
+        print(type(geometry))
+        polygon = Polygon(geometry[0])
+        geom_area = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj(init='EPSG:4326'),
+                pyproj.Proj(
+                    proj='aea',
+                    lat_1=polygon.bounds[1],
+                    lat_2=polygon.bounds[3]
+                )
+            ),
+            polygon)
+        area = geom_area.area / 10000
+        return jsonify({"area": area})
+    return jsonify({"error": "Method not allowed"}), 405

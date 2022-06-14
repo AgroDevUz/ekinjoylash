@@ -120,7 +120,7 @@
     farm_tax_number: null,
     farm_cad_number: null,
   };
-  
+  var full_name = null
   $.ajax({
     url: '{{ url_for('api.kadastr.getby_kadastr') }}?prefix=' + cadastral_number,
     type: 'GET',
@@ -128,6 +128,7 @@
     xhrFields: {
       withCredentials: true,
     },
+    async: false,
     success: function (data) {
       const properties = data[0].features[0].properties
       data_temp.farm_cad_number = properties.cadastral_number;
@@ -139,6 +140,9 @@
           "<td>" + properties[key] + "</td>" +
           "</tr>"
         );
+        if (key == "full_name") {
+          full_name = properties[key]
+        }
       });
       $("#farm-table").parent().css({
         "max-height": "90vh",
@@ -174,6 +178,7 @@
     xhrFields: {
       withCredentials: true,
     },
+    async: false,
     success: function (data) {
 
       console.log(data);
@@ -212,10 +217,11 @@
           onEachFeature: function (feature, layer) {
             console.log(feature.properties);
             var popupContent = '<table>';
+              popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
               popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
-              popupContent += '<tr><td>' + 'Counter Number' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
-              popupContent += '<tr><td>' + 'Ball Bonitet' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
-              popupContent += '<tr><td>' + 'Maydoni' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
+              popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
+              popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
+              popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
             popupContent += `</table>`;
             ;
             layer.bindPopup(popupContent);
@@ -295,14 +301,51 @@
     var type = e.layerType;
     var layer = e.layer;
     drawnItems.addLayer(layer);
+       
+    var objects = layer.getLatLngs()[0];
+    var geom = [[]];
+    // o.Point {x: 744794.1851014761, y: -5309112.129212381}
+    var first = "";
+    for (var i = 0; i < objects.length; i++) {
+      if (i == 0) {
+        first = new L.latLng(objects[i].lat, objects[i].lng)};
+
+      var latlng = new L.latLng(objects[i].lat, objects[i].lng);
+      //var point = L.Projection.SphericalMercator.project(latlng);
+      var point = latlng; 
+      // console.log(point);
+      // console.log(L.Projection.LonLat.project(latlng));
+      // console.log(L.Projection.Mercator.project(latlng));
+
+      geom[0].push([point['lng'], point['lat']]);
+    }
+    geom[0].push([first['lng'], first['lat']]);
+
+    var area = null
+
+    $.ajax({
+      url: '{{ url_for('api.crop.calc_area') }}',
+      type: 'POST',
+      dataType: 'json',
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        geom: geom,
+      }),
+      async: false,
+      success: function (data) {
+        area = data['area'];
+      }
+    })
     let popupContent = `
     <div class='save-polygon'>
-      <input name='contour_number'><label for='contour_number'>Counter Number</label>
-      <input name='ball_bonitet'><label for='ball_bonitet'>Ball Bonitet</label>
+      <input name='area' value='${full_name}' readonly><label for='area'>Full name</label>
+      <input name='area' value='${area.toFixed(2)}' readonly><label for='area'>Umumiy maydoni (ga)</label>
+      <input name='contour_number'><label for='contour_number'>Kontur raqami</label>
+      <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>
       <select name='crop_name' required>
         <option hidden disabled selected>Ekinni tanlang</option>`
     $.ajax({
-      url: '{{ url_for('api.crop.getcrops') }}',
+      url: '{{ url_for('api.crop.get_select_data') }}',
       type: 'GET',
       dataType: 'json',
       xhrFields: {
@@ -319,25 +362,6 @@
         layer.bindPopup(popupContent).openPopup();
         /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
         layer.bindPopup(popupContent).openPopup()*/
-       
-        var objects = layer.getLatLngs()[0];
-        let geom = [[]];
-        // o.Point {x: 744794.1851014761, y: -5309112.129212381}
-        var first = "";
-        for (var i = 0; i < objects.length; i++) {
-          if (i == 0) {
-            first = new L.latLng(objects[i].lat, objects[i].lng)};
-
-          var latlng = new L.latLng(objects[i].lat, objects[i].lng);
-          //var point = L.Projection.SphericalMercator.project(latlng);
-          var point = latlng; 
-          // console.log(point);
-          // console.log(L.Projection.LonLat.project(latlng));
-          // console.log(L.Projection.Mercator.project(latlng));
-    
-          geom[0].push([point['lng'], point['lat']]);
-        }
-        geom[0].push([first['lng'], first['lat']]);
         // console.log(geom);
         document.querySelector('.leaflet-popup-close-button span').addEventListener('click', () => {
           drawnItems.clearLayers();

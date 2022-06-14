@@ -256,7 +256,8 @@
     function click_filter(e){
         map.spin(true);
         farmers.remove();
-        var url = $(e).attr("data-url");
+        var url = `{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=`;
+        url += $("#filters").val();
         render_map(url);
     }
 
@@ -264,14 +265,29 @@
 
         var div = L.DomUtil.create('div', 'filter');
         div.innerHTML = `
+
+           <select id="filters" >
             
+                <option selected value="">Ekin turi bo'yicha qidirish</option>
+                <option value="">Barchasi</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_ancillary%27">Ancillary</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_highways%27">Highways</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_dehkan%27">Dehqon xo'jaliklari</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_bad_land%27">Bad Land</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_r_and_d%27">R&D</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_farm%27">Fermer xo'jaliklari</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_pasture%27">Pasture</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_private%27">Private</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_dehkan_auction%27">Dehqon auksion yerlari</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_farm_auction%27">Fermer auksion yerlari</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_reserve%27">Zaxira yerlar</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_agricultural_enterprises%27">Korxonalarga tegishli yerlar</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_forest%27">O'rmon xo'jaliklari</option>
+                <option value="and%20baunit_type%20=%20%27bu_type_land_household%27">Household</option>
+            
+            </select>
 
-            <button id="returnAll" onclick="click_filter(this)" class="filter_item" data-url="{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=">Barcha yerlar</button>
-            <button id="returnDehkan" onclick="click_filter(this)" class="filter_item" data-url="{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan%27">Dehqon xo'jaliklari</button>
-            <button id="returnFarm" onclick="click_filter(this)" class="filter_item" data-url="{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_farm%27" >Fermer xo'jaliklari</button>
-            <button id="returnDehkanAuction" onclick="click_filter(this)" class="filter_item" data-url="{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_land_dehkan_auction%27" >Zaxira yerlar</button>
-            <button id="returnEnterprises" onclick="click_filter(this)" class="filter_item" data-url="{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=and%20baunit_type%20=%20%27bu_type_agricultural_enterprises%27" >Korxonalarga tegishli yerlar</button>
-
+            <button onclick="click_filter()">Submit</button>
           
         `;
 
