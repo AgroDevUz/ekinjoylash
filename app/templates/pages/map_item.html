@@ -341,9 +341,7 @@
       <input name='area' value='${full_name}' readonly><label for='area'>Full name</label>
       <input name='area' value='${area.toFixed(2)}' readonly><label for='area'>Umumiy maydoni (ga)</label>
       <input name='contour_number'><label for='contour_number'>Kontur raqami</label>
-      <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>
-      <select name='crop_name' required>
-        <option hidden disabled selected>Ekinni tanlang</option>`
+      <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>`
     $.ajax({
       url: '{{ url_for('api.crop.get_select_data') }}',
       type: 'GET',
@@ -352,17 +350,45 @@
         withCredentials: true,
       },
       success: function (data) {
-        // console.log(data);
-        data.forEach(element => {
-          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
-        });
+        console.log(data);
+        // crops  
+        popupContent += `
+          <select name='crops' required>
+            <option hidden disabled selected>Ekinni tanlang</option>`
+        for (let x = 0; x < data.crops.length; x++) {
+          popupContent += "<option value='" + data.crops[x].id + "'>" + data.crops[x].name + "</option>";
+        };    
         popupContent += "</select>";
-        popupContent += "<label for='crop_name'>Ekin Nomi</label>";
+        popupContent += "<label for='crops'>Ekin Nomi</label>";
+        // planting_methods 
+        popupContent += `
+          <select name='planting_methods' required>
+            <option hidden disabled selected>Ekish Usulini tanlang</option>`
+        for (let x = 0; x < data.planting_methods.length; x++) {
+          popupContent += "<option value='" + data.planting_methods[x].id + "'>" + data.planting_methods[x].name + "</option>";
+        };    
+        popupContent += "</select>";
+        popupContent += "<label for='planting_methods'>Ekish Usuli</label>";
+        // planting_types
+        popupContent += `
+          <select name='planting_types' required>
+            <option hidden disabled selected>Ekish Turini tanlang</option>`
+        for (let x = 0; x < data.planting_types.length; x++) {
+          popupContent += "<option value='" + data.planting_types[x].id + "'>" + data.planting_types[x].name + "</option>";
+        };    
+        popupContent += "</select>";
+        popupContent += "<label for='planting_types'>Ekish Turi Nomi</label>";
+        // land_types  
+        popupContent += `
+          <select name='land_types' required>
+            <option hidden disabled selected>Yer Turini tanlang</option>`
+        for (let x = 0; x < data.land_types.length; x++) {
+          popupContent += "<option value='" + data.land_types[x].id + "'>" + data.land_types[x].name + "</option>";
+        };    
+        popupContent += "</select>";
+        popupContent += "<label for='land_types'>Yer Turi</label>";
         popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
         layer.bindPopup(popupContent).openPopup();
-        /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
-        layer.bindPopup(popupContent).openPopup()*/
-        // console.log(geom);
         document.querySelector('.leaflet-popup-close-button span').addEventListener('click', () => {
           drawnItems.clearLayers();
           map.removeControl(drawControl);
@@ -370,41 +396,47 @@
           map.addControl(drawControl);
         });
         $("#save-polygon-btn").click(function () {
-          let crop_name = $("select[name='crop_name']").val();
+          let crops = $("select[name='crops']").val();
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
-          if (crop_name != null && contour_number != null && ball_bonitet != null) {
+          let land_types = $("select[name='land_types']").val();
+          let planting_methods = $("select[name='planting_methods']").val();
+          let planting_types = $("select[name='planting_types']").val();
+          if (crops != null && contour_number != null && ball_bonitet != null && land_types != null && planting_methods != null && planting_types != null) {
             let data = {
               "geom": geom,
-              "crop_name": crop_name,
+              "crops": crops,
               "contour_number": contour_number,
               "ball_bonitet": ball_bonitet,
+              "land_types": land_types,
+              "planting_methods": planting_methods,
+              "planting_types": planting_types,
               "district_id": data_temp.district_id,
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
             };
-            // console.log(data);
-            $.ajax({
-              url: '{{ url_for('api.crop.crop_main') }}',
-              type: 'POST',
-              dataType: 'json',
-              contentType: "application/json; charset=utf-8",
-              data: JSON.stringify(data),
-              xhrFields: {
-                withCredentials: true,
-              },
-              success: function (data) {
-                map.spin(false);
-                console.log(data);
-                drawnItems.clearLayers();
-                location.reload();
-                // console.log(data);
-                /* map.removeControl(drawControl);
-                drawnItems.clearLayers();
-                drawControl = new L.Control.Draw(options);
-                map.addControl(drawControl);*/
-              }
-            })
+            console.log(data);
+            // $.ajax({
+            //   url: '{{ url_for('api.crop.crop_main') }}',
+            //   type: 'POST',
+            //   dataType: 'json',
+            //   contentType: "application/json; charset=utf-8",
+            //   data: JSON.stringify(data),
+            //   xhrFields: {
+            //     withCredentials: true,
+            //   },
+            //   success: function (data) {
+            //     map.spin(false);
+            //     console.log(data);
+            //     drawnItems.clearLayers();
+            //     location.reload();
+            //     // console.log(data);
+            //     /* map.removeControl(drawControl);
+            //     drawnItems.clearLayers();
+            //     drawControl = new L.Control.Draw(options);
+            //     map.addControl(drawControl);*/
+            //   }
+            // })
           }
         })
       }
