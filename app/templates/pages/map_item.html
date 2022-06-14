@@ -193,7 +193,10 @@
                   <th> Yer maydoni </th>
                   <th> Ekin turi </th>
                   <th> Ball bonitet </th>
-                  <th> Contour Number </th>
+                  <th> Kontur raqami </th>
+                  <th> Yer turi </th>
+                  <th> Ekish usuli </th>
+                  <th> Ekish turi </th>
                   <th> Fermer kadastr raqami </th>
                   <th> Fermer soliq raqami </th>
                   <th> Qo'shilgan vaqti </th>
@@ -221,6 +224,9 @@
               popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
               popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
               popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
+              popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.land_types + '</td></tr>';
+              popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_methods + '</td></tr>';
+              popupContent += '<tr><td>' + 'Ekish turi' + '</td><td>' + feature.properties.planting_types + '</td></tr>';
               popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
             popupContent += `</table>`;
             ;
@@ -231,9 +237,12 @@
             
               <td class="text-center" >${t_r} </td>
               <td> ${parseFloat(feature.properties.area).toFixed(2)} ga</td>
-              <td> ${feature.properties.cropname} </td>
+              <td> ${feature.properties.crops} </td>
               <td> ${feature.properties.ball_bonitet} </td>
               <td> ${feature.properties.contour_number} </td>
+              <td> ${feature.properties.land_types} </td>
+              <td> ${feature.properties.planting_methods} </td>
+              <td> ${feature.properties.planting_types} </td>
               <td> ${feature.properties.farm_cad_number} </td>
               <td> ${feature.properties.farm_tax_number} </td>
               <td> ${feature.properties.created_at} </td>
@@ -311,11 +320,7 @@
         first = new L.latLng(objects[i].lat, objects[i].lng)};
 
       var latlng = new L.latLng(objects[i].lat, objects[i].lng);
-      //var point = L.Projection.SphericalMercator.project(latlng);
       var point = latlng; 
-      // console.log(point);
-      // console.log(L.Projection.LonLat.project(latlng));
-      // console.log(L.Projection.Mercator.project(latlng));
 
       geom[0].push([point['lng'], point['lat']]);
     }
@@ -350,7 +355,6 @@
         withCredentials: true,
       },
       success: function (data) {
-        console.log(data);
         // crops  
         popupContent += `
           <select name='crops' required>
@@ -415,28 +419,26 @@
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
             };
-            console.log(data);
-            // $.ajax({
-            //   url: '{{ url_for('api.crop.crop_main') }}',
-            //   type: 'POST',
-            //   dataType: 'json',
-            //   contentType: "application/json; charset=utf-8",
-            //   data: JSON.stringify(data),
-            //   xhrFields: {
-            //     withCredentials: true,
-            //   },
-            //   success: function (data) {
-            //     map.spin(false);
-            //     console.log(data);
-            //     drawnItems.clearLayers();
-            //     location.reload();
-            //     // console.log(data);
-            //     /* map.removeControl(drawControl);
-            //     drawnItems.clearLayers();
-            //     drawControl = new L.Control.Draw(options);
-            //     map.addControl(drawControl);*/
-            //   }
-            // })
+            $.ajax({
+              url: '{{ url_for('api.crop.crop_main') }}',
+              type: 'POST',
+              dataType: 'json',
+              contentType: "application/json; charset=utf-8",
+              data: JSON.stringify(data),
+              xhrFields: {
+                withCredentials: true,
+              },
+              success: function (data) {
+                map.spin(false);
+                console.log(data);
+                drawnItems.clearLayers();
+                location.reload();
+                map.removeControl(drawControl);
+                drawnItems.clearLayers();
+                drawControl = new L.Control.Draw(options);
+                map.addControl(drawControl);
+              }
+            })
           }
         })
       }
