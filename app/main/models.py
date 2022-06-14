@@ -103,33 +103,82 @@ class CropName(db.Model):
             'name' : self.name,
             'code' : self.code
         }
+    
+
+class LandType(db.Model):
+    __tablename__ = "landtype"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    crops = relationship("Crop", backref="landtype", lazy=True)
+    def __repr__(self):
+        return "%s"%(self.name)
+    
+    def format(self):
+        return {
+            'id' : self.id,
+            'name' : self.name
+        }
+
+
+class PlantingType(db.Model):
+    __tablename__ = "plantingtype"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    crops = relationship("Crop", backref="plantingtype", lazy=True)
+    def __repr__(self):
+        return "%s"%(self.name)
+    
+    def format(self):
+        return {
+            'id' : self.id,
+            'name' : self.name
+        }
+
+
+class PlantingMethod(db.Model):
+    __tablename__ = "plantingmethod"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    crops = relationship("Crop", backref="plantingmethod", lazy=True)
+    def __repr__(self):
+        return "%s"%(self.name)
+    
+    def format(self):
+        return {
+            'id' : self.id,
+            'name' : self.name
+        }
+
         
 class Crop(db.Model):
     __tablename__ = "crop"
     id = db.Column(db.Integer, primary_key=True)
     crop_id = db.Column(db.Integer, db.ForeignKey('cropname.id'), nullable=True)
-    area = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON"), nullable = True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     district_id = db.Column(db.Integer, db.ForeignKey('district.id'), nullable=True)
+    contour_number = db.Column(db.Integer, nullable=True)
+    area = db.Column(db.Float, nullable=True)
     farm_tax_number = db.Column(db.String, nullable=True)
     farm_cad_number = db.Column(db.String, nullable=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    land_type_id = db.Column(db.Integer, db.ForeignKey('landtype.id'), nullable=True)
+    planting_type_id = db.Column(db.Integer, db.ForeignKey('plantingtype.id'), nullable=True)
+    planting_method_id = db.Column(db.Integer, db.ForeignKey('plantingmethod.id'), nullable=True)
+    productivity = db.Column(db.Float, nullable=True)
+    geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
-    updated_at = db.Column(db.DateTime,default=datetime.now, nullable=True)
-    ball_bonitet = db.Column(db.Float, nullable=True)
-    contour_number = db.Column(db.Integer, nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.now, nullable=True)
 
     def format(self):
         return {
             "id" : self.id,
             "name" : CropName.query.get(self.crop_id).name,
-            "area" : self.area,
+            "user_id" : self.user_id,
             "district_name" : self.district.name,
+            "area" : self.area,
+            "contour_number" : self.contour_number,
             "farm_tax_number" : self.farm_tax_number,
             "farm_cad_number" : self.farm_cad_number,
-            "user_id" : self.user_id,
+            "productivity" : self.productivity,
             "created_at" : self.created_at,
             "updated_at" : self.updated_at,
-            "ball_bonitet" : self.ball_bonitet,
-            "contour_number" : self.contour_number
         }
