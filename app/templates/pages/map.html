@@ -229,6 +229,51 @@
     
             farmers.addTo(map);
             map.spin(false);
+
+            // var filter_div = L.control({
+            //     position: 'bottomright'
+            // });
+
+            // filter.onAdd = function (map) {
+
+            //     var filter_div = L.DomUtil.create('div', 'filter_div');
+            //     div.innerHTML = `
+
+            //         <select id="new_filter" >
+                        
+            //                 <option hidden disabled selected>Ekin turi bo'yicha qidirish</option>
+            //                 <option value="">Barchasi</option>
+            //                 <option value="bu_type_land_ancillary">Ancillary</option>
+            //                 <option value="bu_type_land_highways">Highways</option>
+            //                 <option value="bu_type_land_dehkan">Dehqon xo'jaliklari</option>
+            //                 <option value="bu_type_bad_land">Bad Land</option>
+            //                 <option value="bu_type_land_r_and_d">R&D</option>
+            //                 <option value="bu_type_land_farm">Fermer xo'jaliklari</option>
+            //                 <option value="bu_type_land_pasture">Pasture</option>
+            //                 <option value="bu_type_land_private">Private</option>
+            //                 <option value="bu_type_land_dehkan_auction">Dehqon auksion yerlari</option>
+            //                 <option value="bu_type_land_farm_auction">Fermer auksion yerlari</option>
+            //                 <option value="bu_type_land_reserve">Zaxira yerlar</option>
+            //                 <option value="bu_type_agricultural_enterprises">Korxonalarga tegishli yerlar</option>
+            //                 <option value="bu_type_land_forest">O'rmon xo'jaliklari</option>
+            //                 <option value="bu_type_land_household">Household</option>
+                        
+            //         </select>
+
+            //         <button onclick="new_filter()">Submit</button>
+                    
+            //     `
+
+            //     return div;
+            // }
+
+            // filter_div.addTo(map);
+
+            // (function filterLayers() {
+            
+                
+
+            // })();
     
         });
     }
@@ -252,13 +297,33 @@
     var filter = L.control({
         position: 'bottomright'
     });
-    
-    function click_filter(e){
+
+    var new_filter = () => {
+
         map.spin(true);
         farmers.remove();
-        var url = `{{ url_for('api.kadastr.filter_kadastr') }}?prefix=${cad_num}&filters=`;
-        url += $("#filters").val();
-        render_map(url);
+
+        if ($("#new_filter").val() != 'all') {
+            farmers._layers0 = farmers._layers;
+            farmers._layers1 = farmers._layers;
+            farmers._layers_change = {};
+
+            for (elem in farmers._layers0) {
+                if(farmers._layers0[elem].feature.properties.baunit_type === $("#new_filter").val()) {
+                    farmers._layers_change[elem] = farmers._layers0[elem];
+                }
+            }
+
+            farmers._layers = farmers._layers_change;
+            farmers.addTo(map);
+            farmers._layers = farmers._layers0;
+            map.spin(false);
+        } else {
+            farmers.addTo(map);
+            farmers._layers = farmers._layers0;
+            map.spin(false);
+        }
+
     }
 
     filter.onAdd = function (map) {
@@ -266,30 +331,30 @@
         var div = L.DomUtil.create('div', 'filter');
         div.innerHTML = `
 
-           <select id="filters" >
-            
-                <option hidden disabled selected>Ekin turi bo'yicha qidirish</option>
-                <option value="">Barchasi</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_ancillary%27">Ancillary</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_highways%27">Highways</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_dehkan%27">Dehqon xo'jaliklari</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_bad_land%27">Bad Land</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_r_and_d%27">R&D</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_farm%27">Fermer xo'jaliklari</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_pasture%27">Pasture</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_private%27">Private</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_dehkan_auction%27">Dehqon auksion yerlari</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_farm_auction%27">Fermer auksion yerlari</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_reserve%27">Zaxira yerlar</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_agricultural_enterprises%27">Korxonalarga tegishli yerlar</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_forest%27">O'rmon xo'jaliklari</option>
-                <option value="and%20baunit_type%20=%20%27bu_type_land_household%27">Household</option>
-            
+            <select id="new_filter" >
+                
+                    <option hidden disabled selected>Ekin turi bo'yicha qidirish</option>
+                    <option value="all">Barchasi</option>
+                    <option value="bu_type_land_ancillary">Ancillary</option>
+                    <option value="bu_type_land_highways">Highways</option>
+                    <option value="bu_type_land_dehkan">Dehqon xo'jaliklari</option>
+                    <option value="bu_type_bad_land">Bad Land</option>
+                    <option value="bu_type_land_r_and_d">R&D</option>
+                    <option value="bu_type_land_farm">Fermer xo'jaliklari</option>
+                    <option value="bu_type_land_pasture">Pasture</option>
+                    <option value="bu_type_land_private">Private</option>
+                    <option value="bu_type_land_dehkan_auction">Dehqon auksion yerlari</option>
+                    <option value="bu_type_land_farm_auction">Fermer auksion yerlari</option>
+                    <option value="bu_type_land_reserve">Zaxira yerlar</option>
+                    <option value="bu_type_agricultural_enterprises">Korxonalarga tegishli yerlar</option>
+                    <option value="bu_type_land_forest">O'rmon xo'jaliklari</option>
+                    <option value="bu_type_land_household">Household</option>
+                
             </select>
 
-            <button onclick="click_filter()">Submit</button>
-          
-        `;
+            <button onclick="new_filter()">Submit</button>
+            
+        `
 
         return div;
     };
