@@ -80,3 +80,7 @@
     height: 100%;
     border: none;
 }
+
+.leaflet-control-attribution {
+    display: none;
+}
