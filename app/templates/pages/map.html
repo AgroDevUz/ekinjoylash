@@ -50,7 +50,7 @@
 </div>
 
 <div class="fixed_custom">
-    <h1>Info </h1>
+    <h1> Info </h1>
 </div>
 
 {% endblock %}
@@ -85,7 +85,7 @@
 <script src="{{ url_for('static', filename='dist/js/map/style.js')}}"></script>
 
 <script>
-    
+
     const defaultCenter = [42, 64]
     const defaultZoom = 8
     cad_num = "{{data}}";
@@ -234,11 +234,78 @@
         });
     }
 
+    function render_table(geojson_url){
+
+        $.ajax({
+
+            url: geojson_url,
+            dataType: "json"
+
+        }).always(response => {
+
+            var t_r = 1;
+            $("#right-bar").empty();
+            var table_main = `
+            <table id="right-table" class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th> T/B </th>
+                        <th> Nomi </th>
+                        <th> Turi </th>
+                        <th> Kadastr Raqami </th>
+                        <th> Stir Raqami </th>
+                        <th style="width: 50px;"> Jami maydoni </th>
+                        <th style="width: 50px;"> Jami Q.X yerlari </th>
+                        <th style="width: 50px;"> Jami Ekin yerlari </th>
+                        <th style="width: 50px;"> Jami sug'oriladigon ekin yerlari </th>
+                        <th style="width: 50px;"> Jami lalmi ekin yerlari </th>
+                    </tr>
+                </thead>
+
+                <tbody id="right-tbody">
+
+                </tbody>
+            </table>`
+            $("#right-bar").append(table_main);
+            for (var item of response[0].features) {
+
+                if(item.properties.baunit_type === $("#new_filter").val()) {
+
+                    var pr = item.properties;
+                    var it = `<tr>
+                            <td class="text-center" >${t_r} </td>
+                            <td> ${pr.full_name} </td>
+                            <td> ${pr.baunit_type_title} </td>
+                            <td> ${pr.cadastral_number} </td>
+                            <td> ${pr.tax_number} </td>
+                            <td> ${pr.legal_area} </td>
+                            <td> ${pr.total_farmland_areas} </td>
+                            <td> ${pr.total_arable_areas} </td>
+                            <td> ${pr.arable_areas_with_water} </td>
+                            <td> ${pr.arable_areas_without_wtr} </td>
+
+                        </tr>`;
+                    $("#right-tbody").append(it);
+                    t_r += 1;
+
+                }
+
+            };
+
+            $("#right-table").DataTable({
+
+                "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false,
+
+            });
+
+        });
+    }
+
     function zoomToFeature(e) {
 
         var layer = e.target;
-        farmers.resetStyle()
-        layer.setStyle({color: 'red', weight: '3'})
+        farmers.resetStyle();
+        layer.setStyle({ fillColor: farmerColors[tables[this.feature.properties.baunit_type]], color: 'white', weight: '3', opacity: 1, fillOpacity: 0.8 })
         map.fitBounds(e.target.getBounds());
         
     };
@@ -273,10 +340,12 @@
             farmers._layers = farmers._layers_change;
             farmers.addTo(map);
             farmers._layers = farmers._layers0;
+            render_table('{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num, $("#new_filter").val());
             map.spin(false);
         } else {
             farmers.addTo(map);
             farmers._layers = farmers._layers0;
+            render_table('{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num, $("#new_filter").val());
             map.spin(false);
         }
 
@@ -289,7 +358,7 @@
 
             <select id="new_filter" >
                 
-                    <option hidden disabled selected>Ekin turi bo'yicha qidirish</option>
+                    <option hidden disabled selected>Yer turi bo'yicha qidirish</option>
                     <option value="all">Barchasi</option>
                     <option value="bu_type_land_ancillary">Ancillary</option>
                     <option value="bu_type_land_highways">Highways</option>
