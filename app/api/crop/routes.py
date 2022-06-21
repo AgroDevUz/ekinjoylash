@@ -161,7 +161,7 @@ def get_crop_geojson():
                 'features': []
             }
         }
-    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.productivity, Crop.contour_number, CropName.name, LandType.name, PlantingType.name, PlantingMethod.name)\
+    crops_obj = db.session.query(Crop.id, Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.productivity, Crop.contour_number, CropName.name, LandType.name, PlantingType.name, PlantingMethod.name)\
         .join(CropName, CropName.id == Crop.crop_id)\
         .join(LandType, LandType.id == Crop.land_type_id)\
         .join(PlantingType, PlantingType.id == Crop.planting_type_id)\
@@ -171,7 +171,7 @@ def get_crop_geojson():
         "type": "FeatureCollection",
         "features": []
     }
-    for crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number, cropname, crop_land_type, crop_planting_type, crop_planting_method in crops_obj:
+    for id, crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number, cropname, crop_land_type, crop_planting_type, crop_planting_method in crops_obj:
 
         feature = {
             "type": "Feature"
@@ -179,6 +179,7 @@ def get_crop_geojson():
         crop_geo = json.loads(crop_geo)
         feature['geometry'] = crop_geo
         feature['properties'] = {
+            'id': id,
             'area': crop_area,
             'district_id': crop_district_id,
             "cropname" : cropname,
@@ -371,3 +372,80 @@ def get_crop_data_by_farmer():
                     new_temp.append(value)
             data.append(new_temp)
         return jsonify(data)
+
+
+@crop.route("/edit", methods=['POST'])
+@login_required
+def edit():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+        except Exception as e:
+            return jsonify({"error": str(e)})
+        crop = Crop.query.filter(Crop.id == data.get('id')).first()
+        if not data:
+            return jsonify({"error": "No data"}), 400
+        crop_name = data.get('crop_name')
+        crop_id = CropName.query.filter_by(code=crop_name).first().id
+        geometry = data.get('geom')
+        print(type(geometry), geometry)
+        polygon = Polygon(geometry[0])
+        geom_area = ops.transform(
+            partial(
+                pyproj.transform,
+                pyproj.Proj(init='EPSG:4326'),
+                pyproj.Proj(
+                    proj='aea',
+                    lat_1=polygon.bounds[1],
+                    lat_2=polygon.bounds[3]
+                )
+            ),
+            polygon)
+        area = geom_area.area / 10000
+        district_id = data.get('district_id')
+        farm_tax_number = data.get('farm_tax_number')
+        farm_cad_number = data.get('farm_cad_number')
+        productivity = data.get('productivity')
+        contour_number = data.get('contour_number')
+        land_type_id = data.get('land_type_id')
+        planting_type_id = data.get('planting_type_id')
+        planting_method_id = data.get('planting_method_id')
+        geometry = {'type': 'MultiPolygon', 'coordinates': [geometry]}
+        try:
+            geometry = wkt.dumps(geometry)
+            geometry = "SRID=4326;%s"%geometry
+            print(geometry)
+        except Exception as E:
+            return jsonify({'error': str(E), "key" : "geometry"}), 400
+        
+        if not District.query.get(district_id):
+            return jsonify({'error': 'District not found'})
+        crop.crop_id = crop_id
+        crop.area = area
+        crop.district_id = district_id
+        crop.farm_tax_number = farm_tax_number
+        crop.farm_cad_number = farm_cad_number
+        crop.productivity = productivity
+        crop.contour_number = contour_number
+        crop.land_type_id = land_type_id
+        crop.planting_type_id = planting_type_id
+        crop.planting_method_id = planting_method_id
+        crop.geometry = geometry
+        db.session.commit()
+        return jsonify({'success': "Crop updated"})
+
+
+@crop.route("/delete", methods=['POST'])
+@login_required
+def delete():
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+        except Exception as e:
+            return jsonify({"error": str(e)})
+        crop = Crop.query.filter(Crop.id == data.get('id')).first()
+        if not data:
+            return jsonify({"error": "No data"}), 400
+        db.session.delete(crop)
+        db.session.commit()
+        return jsonify({'success': "Crop deleted"})
