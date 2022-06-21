@@ -385,7 +385,6 @@
           it += "</tr>";
           $("#right-tbody").append(it);
         }
-        $("#right-bar").DataTable();
       }
     });
   }
@@ -504,7 +503,7 @@
           map.addControl(drawControl);
         });
         $("#save-polygon-btn").click(function () {
-          let crops = $("select[name='crops']").val();
+          let crop_name = $("select[name='crop_name']").val();
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
           let land_type_id = $("select[name='land_type_id']").val();
@@ -513,7 +512,7 @@
           if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
             let data = {
               "geom": geom,
-              "crops": crops,
+              "crop_name": crop_name,
               "contour_number": contour_number,
               "productivity": ball_bonitet,
               "district_id": data_temp.district_id,
