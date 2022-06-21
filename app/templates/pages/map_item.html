@@ -20,15 +20,25 @@
   }
 
   #right-bar {
-    display: flex;
+    display: inline-block;
     padding: 25px;
     justify-content: center;
     align-content: center;
     align-items: center;
   }
 
+  #right-table {
+    overflow-x: scroll;
+    overflow-y: hidden;
+  }
+
   #right-table th {
     vertical-align: middle;
+  }
+
+  .bottom2top {
+    writing-mode: tb-rl;
+    transform: rotate(180deg);
   }
 </style>
 
@@ -153,7 +163,7 @@
       
       const Layer = L.geoJSON(data, {
         style: {
-          color: 'red',
+          color: '#ccf781',
           fillColor: 'transparent',
           weight: 2,
         },
@@ -168,95 +178,212 @@
       return data;
     }
   });
-  $.ajax({
-    url: '{{ url_for('api.crop.get_crop_geojson') }}',
-    type: 'GET',
-    dataType: 'json',
-    data: {
-      cadastral_number: cadastral_number,
-    },
-    xhrFields: {
-      withCredentials: true,
-    },
-    async: false,
-    success: function (data) {
+  function setLayer() {
+    $.ajax({
+      url: '{{ url_for('api.crop.get_crop_geojson') }}',
+      type: 'GET',
+      dataType: 'json',
+      data: {
+        cadastral_number: cadastral_number,
+      },
+      xhrFields: {
+        withCredentials: true,
+      },
+      async: false,
+      success: function (data) {
 
-      console.log(data);
+        console.log(data);
 
-      var t_r = 1;
-      $("#right-bar").empty();
-      var table_main = `
-      <table id="right-table" class="table table-bordered">
-          <thead>
-              <tr>
-                  <th> № </th>
-                  <th> Yer maydoni </th>
-                  <th> Ekin turi </th>
-                  <th> Ball bonitet </th>
-                  <th> Contour Number </th>
-                  <th> Fermer kadastr raqami </th>
-                  <th> Fermer soliq raqami </th>
-                  <th> Qo'shilgan vaqti </th>
-                  <th> Ohirgi o'zgartirish qilinga kuni </th>
-              </tr>
-          </thead>
-  
-          <tbody id="right-tbody">
-  
-          </tbody>
-      </table>`
+        var t_r = 1;
+        $("#right-bar").empty();
+        var table_main = `
+        <table id="right-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th> № </th>
+                    <th> Yer maydoni </th>
+                    <th> Ekin turi </th>
+                    <th> Ball bonitet </th>
+                    <th> Contour Number </th>
+                    <th> Fermer kadastr raqami </th>
+                    <th> Fermer soliq raqami </th>
+                    <th> Qo'shilgan vaqti </th>
+                    <th> Ohirgi o'zgartirish qilinga kuni </th>
+                </tr>
+            </thead>
+    
+            <tbody id="right-tbody">
+    
+            </tbody>
+        </table>`
 
-      $("#right-bar").append(table_main);
+        $("#right-bar").append(table_main);
 
-      Object.keys(data).forEach(function (key) {
-        const Layer = L.geoJSON(data[key]['feature_collection'], {
-          style: {
-            color: data[key]['color'],
-            weight: 3,
-          },
-          onEachFeature: function (feature, layer) {
-            console.log(feature.properties);
-            var popupContent = '<table>';
-              popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
-              popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
-              popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
-              popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
-              popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
-            popupContent += `</table>`;
-            ;
-            layer.bindPopup(popupContent);
-            // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
+        Object.keys(data).forEach(function (key) {
+          const Layer = L.geoJSON(data[key]['feature_collection'], {
+            style: {
+              color: data[key]['color'],
+              weight: 3,
+            },
+            onEachFeature: function (feature, layer) {
+              console.log(feature.properties);
+              var popupContent = '<table>';
+                popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
+                popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
+                popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
+                popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
+                popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
+                popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.land_type + '</td></tr>';
+                popupContent += '<tr><td>' + 'Ekish turi' + '</td><td>' + feature.properties.planting_type + '</td></tr>';
+                popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
+              popupContent += `</table>`;
+              ;
+              layer.bindPopup(popupContent);
+              // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
 
-            var it = `<tr>
-            
-              <td class="text-center" >${t_r} </td>
-              <td> ${parseFloat(feature.properties.area).toFixed(2)} ga</td>
-              <td> ${feature.properties.cropname} </td>
-              <td> ${feature.properties.ball_bonitet} </td>
-              <td> ${feature.properties.contour_number} </td>
-              <td> ${feature.properties.farm_cad_number} </td>
-              <td> ${feature.properties.farm_tax_number} </td>
-              <td> ${feature.properties.created_at} </td>
-              <td> ${feature.properties.updated_at} </td>
+              var it = `<tr>
+              
+                <td class="text-center" >${t_r} </td>
+                <td> ${parseFloat(feature.properties.area).toFixed(2)} ga</td>
+                <td> ${feature.properties.cropname} </td>
+                <td> ${feature.properties.ball_bonitet} </td>
+                <td> ${feature.properties.contour_number} </td>
+                <td> ${feature.properties.farm_cad_number} </td>
+                <td> ${feature.properties.farm_tax_number} </td>
+                <td> ${feature.properties.created_at} </td>
+                <td> ${feature.properties.updated_at} </td>
 
-              </tr>`;
-            $("#right-tbody").append(it);
-            t_r += 1;
-          }
+                </tr>`;
+              $("#right-tbody").append(it);
+              t_r += 1;
+            }
+          });
+          Layer.addTo(map);
+        })
+
+        $("#right-table").DataTable({
+
+          "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false,
+
         });
-        Layer.addTo(map);
-      })
+        
+        map.spin(false);
+        return data;
+      }
+    });
+    $.ajax({
+      url: '{{ url_for('api.crop.get_crop_data_by_farmer') }}',
+      type: 'POST',
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        cadastral_number: cadastral_number,
+      }),
+      xhrFields: {
+        withCredentials: true,
+      },
+      async: false,
+      success: function (data) {
+        console.log(data);
+        $("#right-bar").empty();
+        var table_main = `
+        <table id="right-table" class="table table-bordered">
+            <thead class='text-center'>
+                <tr>
+                    <th rowspan='4'> Т/р </th>
+                    <th rowspan='4'> Ердан фойдаланувчилар номи </th>
+                    <th rowspan='4' class='bottom2top'> Контур раками </th>
+                    <th rowspan='4'> Жами экин экиладиган майдон </th>
+                    <th colspan='15'>Шундан қишлоқ хўжалиги экинларининг жойлашуви:</th>
+                    <th colspan='20'>Шундан қишлоқ хўжалиги экинларининг жойлашуви:</th>
+                    <th colspan='14'>Шундан қишлоқ хўжалиги экинларининг жойлашуви:</th>
+                </tr>
+                <tr>
+                    <th rowspan='3'>Техник экинлар</th>
+                    <th colspan='3'>Шундан</th>
+                    <th rowspan='3'>Бошоқли донли экинлар</th>
+                    <th colspan='3'>Шундан</th>
+                    <th rowspan='3'>шоли</th>
+                    <th rowspan='3'>Дуккакли дон экинлари</th>
+                    <th colspan='5'>Шундан</th>
+                    <th rowspan='3'>Мойли экинлар</th>
+                    <th colspan='5'>Шундан</th>
+                    <th rowspan='3'>Сабзавот</th>
+                    <th rowspan='3'>Полиз</th>
+                    <th colspan='3'>Шундан</th>
+                    <th rowspan='3'>Картошка</th>
+                    <th rowspan='3'>Озуқа (ем-хашак) экинлар</th>
+                    <th colspan='5'>Шундан</th>
+                    <th rowspan='3'>Доривор экинлар</th>
+                    <th rowspan='3'>Супурги</th>
+                    <th rowspan='3'>Паст балл бонитетли ерларда барпо қилинадиган кўп йиллик дарахтзорлар</th>
+                    <th colspan='9'>Шундан</th>
+                </tr>
+                <tr>
+                    <th rowspan='2' class='bottom2top'>ғўза</th>
+                    <th rowspan='2' class='bottom2top'>каннабис</th>
+                    <th rowspan='2' class='bottom2top'>тамаки</th>
+                    <th rowspan='2' class='bottom2top'>буғдой</th>
+                    <th rowspan='2' class='bottom2top'>арпа</th>
+                    <th rowspan='2' class='bottom2top'>тритикале</th>
+                    <th rowspan='2' class='bottom2top'>нўхат</th>
+                    <th rowspan='2' class='bottom2top'>мош</th>
+                    <th rowspan='2' class='bottom2top'>ловия</th>
+                    <th rowspan='2' class='bottom2top'>қизил ловия</th>
+                    <th rowspan='2' class='bottom2top'>ерёнғоқ</th>
+                    <th rowspan='2' class='bottom2top'>соя</th>
+                    <th rowspan='2' class='bottom2top'>кунгабоқар</th>
+                    <th rowspan='2' class='bottom2top'>кунжут</th>
+                    <th rowspan='2' class='bottom2top'>седана</th>
+                    <th rowspan='2' class='bottom2top'>рапс</th>
+                    <th rowspan='2' class='bottom2top'>тарвуз</th>
+                    <th rowspan='2' class='bottom2top'>қовун</th>
+                    <th rowspan='2' class='bottom2top'>қовоқ</th>
+                    <th rowspan='2' class='bottom2top'>беда</th>
+                    <th rowspan='2' class='bottom2top'>хашаки лавлаги</th>
+                    <th rowspan='2' class='bottom2top'>оқ жўхори силос учун</th>
+                    <th rowspan='2' class='bottom2top'>макка дон учун</th>
+                    <th rowspan='2' class='bottom2top'>макка силос учун</th>
+                    <th rowspan='2' class='bottom2top'>интенсив боғлар</th>
+                    <th colspan='6'>шу жумладан:</th>
+                    <th rowspan='2' class='bottom2top'>узумзорлар</th>
+                    <th rowspan='2' class='bottom2top'>тутзорлар</th>
+                </tr>
+                <tr>
+                    <th class='bottom2top'>данакли</th>
+                    <th class='bottom2top'>уруғлик</th>
+                    <th class='bottom2top'>ёнғоқ мевалилар</th>
+                    <th class='bottom2top'>анор</th>
+                    <th class='bottom2top'>зайтун</th>
+                    <th class='bottom2top'>малина</th>
+                </tr>
+            </thead>
+    
+            <tbody id="right-tbody">
+    
+            </tbody>
+        </table>`
 
-      $("#right-table").DataTable({
-
-        "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false,
-
-      });
-      
-      map.spin(false);
-      return data;
-    }
-  });
+        $("#right-bar").append(table_main);
+        for (let i = 0; i < data.length; i++) {
+          var it = "<tr>"
+          it += "<td class='text-center'>" + (i + 1) + "</td>"
+          it += "<td>" + full_name + "</td>"
+          data[i].forEach(function (value, index) {
+            if (index == 0) {
+              it += `<td>${value}</td>`
+            } else {
+              it += `<td class='text-center'>${value == 0 ? value : value.toFixed(2)}</td>`
+            }
+          });
+          it += "</tr>";
+          $("#right-tbody").append(it);
+        }
+        $("#right-bar").DataTable();
+      }
+    });
+  }
+  setLayer()
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
@@ -341,9 +468,9 @@
       <input name='area' value='${full_name}' readonly><label for='area'>Full name</label>
       <input name='area' value='${area.toFixed(2)}' readonly><label for='area'>Umumiy maydoni (ga)</label>
       <input name='contour_number'><label for='contour_number'>Kontur raqami</label>
-      <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>
-      <select name='crop_name' required>
-        <option hidden disabled selected>Ekinni tanlang</option>`
+      <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>`
+      /*<select name='crop_name' required>
+        <option hidden disabled selected>Ekinni tanlang</option>`*/
     $.ajax({
       url: '{{ url_for('api.crop.get_select_data') }}',
       type: 'GET',
@@ -352,12 +479,20 @@
         withCredentials: true,
       },
       success: function (data) {
-        // console.log(data);
-        data.forEach(element => {
+        console.log(data);
+        /*data.forEach(element => {
           popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
         });
-        popupContent += "</select>";
-        popupContent += "<label for='crop_name'>Ekin Nomi</label>";
+        popupContent += "</select>";*/
+        Object.keys(data).forEach(key => {
+          popupContent += "<select name='" + data[key]['key'] + "' required>"
+          popupContent += "<option hidden disabled selected>Tanlang</option>"
+            data[key]['items'].forEach(element => {
+              popupContent += "<option value='" + element.id + "'>" + element.name + "</option>";
+            });
+          popupContent += "</select>";
+          popupContent += "<label for='" + data[key]['key'] + "'>" + data[key]['name'] + "</label>";
+        });
         popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
         layer.bindPopup(popupContent).openPopup();
         /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
@@ -373,13 +508,19 @@
           let crop_name = $("select[name='crop_name']").val();
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
-          if (crop_name != null && contour_number != null && ball_bonitet != null) {
+          let land_type_id = $("select[name='land_type_id']").val();
+          let planting_type_id = $("select[name='planting_type_id']").val();
+          let planting_method_id = $("select[name='planting_method_id']").val();
+          if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
             let data = {
               "geom": geom,
               "crop_name": crop_name,
               "contour_number": contour_number,
-              "ball_bonitet": ball_bonitet,
+              "productivity": ball_bonitet,
               "district_id": data_temp.district_id,
+              "land_type_id": land_type_id,
+              "planting_type_id": planting_type_id,
+              "planting_method_id": planting_method_id,
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
             };
@@ -397,12 +538,12 @@
                 map.spin(false);
                 console.log(data);
                 drawnItems.clearLayers();
-                location.reload();
-                // console.log(data);
-                /* map.removeControl(drawControl);
+                map.removeControl(drawControl);
                 drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
-                map.addControl(drawControl);*/
+                map.addControl(drawControl);
+                setLayer()
+                // console.log(data);
               }
             })
           }
