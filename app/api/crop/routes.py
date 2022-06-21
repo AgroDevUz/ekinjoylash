@@ -161,7 +161,7 @@ def get_crop_geojson():
                 'features': []
             }
         }
-    crops_obj = db.session.query(Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.productivity, Crop.contour_number, CropName.name, LandType.name, PlantingType.name, PlantingMethod.name)\
+    crops_obj = db.session.query(Crop.id, Crop.crop_id, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.productivity, Crop.contour_number, CropName.name, LandType.name, PlantingType.name, PlantingMethod.name)\
         .join(CropName, CropName.id == Crop.crop_id)\
         .join(LandType, LandType.id == Crop.land_type_id)\
         .join(PlantingType, PlantingType.id == Crop.planting_type_id)\
@@ -171,7 +171,7 @@ def get_crop_geojson():
         "type": "FeatureCollection",
         "features": []
     }
-    for crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number, cropname, crop_land_type, crop_planting_type, crop_planting_method in crops_obj:
+    for id, crop_id, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number, cropname, crop_land_type, crop_planting_type, crop_planting_method in crops_obj:
 
         feature = {
             "type": "Feature"
@@ -179,6 +179,7 @@ def get_crop_geojson():
         crop_geo = json.loads(crop_geo)
         feature['geometry'] = crop_geo
         feature['properties'] = {
+            'id': id,
             'area': crop_area,
             'district_id': crop_district_id,
             "cropname" : cropname,
