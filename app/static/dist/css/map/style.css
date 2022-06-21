@@ -53,24 +53,6 @@
     width: 200px;
 }
 
-
-.filter {
-    display: grid;
-}
-
-.filter_item {
-    cursor: pointer;
-    margin: 1%;
-    width: 100%;
-}
-
-.filter_item button {
-    cursor: pointer;
-    width: 100%;
-    background-color: #222222;
-    color: #999999;
-}
-
 .leaflet-popup-content-wrapper {
     min-width: 300px;
 }
@@ -97,4 +79,8 @@
     width: 100%;
     height: 100%;
     border: none;
+}
+
+.leaflet-control-attribution {
+    display: none;
 }

@@ -104,7 +104,7 @@
 
   const mbAttr = 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>';
   const mbUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
-
+  // const mbUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
   const grayscale = L.tileLayer(mbUrl, { id: 'mapbox/light-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
   const streets = L.tileLayer(mbUrl, { id: 'mapbox/streets-v11', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
   const satellite = L.tileLayer(mbUrl, { id: 'mapbox/satellite-v9', tileSize: 512, zoomOffset: -1, attribution: mbAttr });
@@ -204,7 +204,10 @@
                     <th> Yer maydoni </th>
                     <th> Ekin turi </th>
                     <th> Ball bonitet </th>
-                    <th> Contour Number </th>
+                    <th> Kontur raqami </th>
+                    <th> Yer turi </th>
+                    <th> Ekish usuli </th>
+                    <th> Ekish turi </th>
                     <th> Fermer kadastr raqami </th>
                     <th> Fermer soliq raqami </th>
                     <th> Qo'shilgan vaqti </th>
@@ -245,9 +248,12 @@
               
                 <td class="text-center" >${t_r} </td>
                 <td> ${parseFloat(feature.properties.area).toFixed(2)} ga</td>
-                <td> ${feature.properties.cropname} </td>
+                <td> ${feature.properties.crops} </td>
                 <td> ${feature.properties.ball_bonitet} </td>
                 <td> ${feature.properties.contour_number} </td>
+                <td> ${feature.properties.land_types} </td>
+                <td> ${feature.properties.planting_methods} </td>
+                <td> ${feature.properties.planting_types} </td>
                 <td> ${feature.properties.farm_cad_number} </td>
                 <td> ${feature.properties.farm_tax_number} </td>
                 <td> ${feature.properties.created_at} </td>
@@ -438,11 +444,7 @@
         first = new L.latLng(objects[i].lat, objects[i].lng)};
 
       var latlng = new L.latLng(objects[i].lat, objects[i].lng);
-      //var point = L.Projection.SphericalMercator.project(latlng);
       var point = latlng; 
-      // console.log(point);
-      // console.log(L.Projection.LonLat.project(latlng));
-      // console.log(L.Projection.Mercator.project(latlng));
 
       geom[0].push([point['lng'], point['lat']]);
     }
@@ -495,9 +497,6 @@
         });
         popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
         layer.bindPopup(popupContent).openPopup();
-        /*popupContent += "</select><button class='btn btn-primary save-polygon-btn'>Save</button></div>"
-        layer.bindPopup(popupContent).openPopup()*/
-        // console.log(geom);
         document.querySelector('.leaflet-popup-close-button span').addEventListener('click', () => {
           drawnItems.clearLayers();
           map.removeControl(drawControl);
@@ -505,7 +504,7 @@
           map.addControl(drawControl);
         });
         $("#save-polygon-btn").click(function () {
-          let crop_name = $("select[name='crop_name']").val();
+          let crops = $("select[name='crops']").val();
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
           let land_type_id = $("select[name='land_type_id']").val();
@@ -514,7 +513,7 @@
           if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
             let data = {
               "geom": geom,
-              "crop_name": crop_name,
+              "crops": crops,
               "contour_number": contour_number,
               "productivity": ball_bonitet,
               "district_id": data_temp.district_id,
@@ -524,7 +523,6 @@
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
             };
-            // console.log(data);
             $.ajax({
               url: '{{ url_for('api.crop.crop_main') }}',
               type: 'POST',
@@ -538,6 +536,7 @@
                 map.spin(false);
                 console.log(data);
                 drawnItems.clearLayers();
+                
                 map.removeControl(drawControl);
                 drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
