@@ -178,6 +178,9 @@
       return data;
     }
   });
+
+  var drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
   function setLayer() {
     $.ajax({
       url: '{{ url_for('api.crop.get_crop_geojson') }}',
@@ -262,6 +265,28 @@
                 </tr>`;
               $("#right-tbody").append(it);
               t_r += 1;
+
+              layer.on('dblclick', (e) => {
+
+                layer._latlngs = layer._latlngs[0];
+
+                var editItems = e.layer;
+                editItems = new L.FeatureGroup();
+                map.addLayer(editItems);
+                map.removeControl(drawControl);
+                drawControl = new L.Control.Draw({
+                  position: 'topright',
+                  draw: false,
+                  edit: {
+                    featureGroup: editItems,
+                    remove: true,
+                  }
+                });
+                map.addControl(drawControl);
+                editItems.addLayer(layer);
+                // console.log(layer);
+                // console.log(layer.toGeoJSON().geometry);
+              });
             }
           });
           Layer.addTo(map);
@@ -389,9 +414,6 @@
     });
   }
   setLayer()
-
-  var drawnItems = new L.FeatureGroup();
-  map.addLayer(drawnItems);
 
   var options = {
     position: 'topright',

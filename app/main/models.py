@@ -164,7 +164,7 @@ class Crop(db.Model):
     planting_type_id = db.Column(db.Integer, db.ForeignKey('plantingtype.id'), nullable=True)
     planting_method_id = db.Column(db.Integer, db.ForeignKey('plantingmethod.id'), nullable=True)
     productivity = db.Column(db.Float, nullable=True)
-    geometry = db.Column(Geometry(geometry_type="MULTIPOLYGON"), nullable=True)
+    geometry = db.Column(Geometry(geometry_type="POLYGON"), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, nullable=True)
 
