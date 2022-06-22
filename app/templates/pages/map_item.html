@@ -292,10 +292,6 @@
                 });
                 map.addControl(drawControl);
                 editItems.addLayer(layer);
-                // console.log(layer);
-                // console.log(layer.toGeoJSON().geometry);
-
-                console.log(editItems)
               });
             }
           });
@@ -423,7 +419,7 @@
       }
     });
   }
-  setLayer()
+  setLayer();
 
   var options = {
     position: 'topright',
@@ -503,8 +499,6 @@
       <input name='area' value='${area.toFixed(2)}' readonly><label for='area'>Umumiy maydoni (ga)</label>
       <input name='contour_number'><label for='contour_number'>Kontur raqami</label>
       <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>`
-      /*<select name='crop_name' required>
-        <option hidden disabled selected>Ekinni tanlang</option>`*/
     $.ajax({
       url: '{{ url_for('api.crop.get_select_data') }}',
       type: 'GET',
@@ -513,11 +507,6 @@
         withCredentials: true,
       },
       success: function (data) {
-        // console.log(data);
-        /*data.forEach(element => {
-          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
-        });
-        popupContent += "</select>";*/
         Object.keys(data).forEach(key => {
           popupContent += "<select name='" + data[key]['key'] + "' required>"
           popupContent += "<option hidden disabled selected>Tanlang</option>"
@@ -555,6 +544,7 @@
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
             };
+            console.log(geom);
             $.ajax({
               url: '{{ url_for('api.crop.crop_main') }}',
               type: 'POST',
@@ -566,15 +556,13 @@
               },
               success: function (data) {
                 map.spin(false);
-                // console.log(data);
                 drawnItems.clearLayers();
                 
                 map.removeControl(drawControl);
                 drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
                 map.addControl(drawControl);
-                setLayer()
-                // console.log(data);
+                setLayer();
               }
             })
           }
@@ -601,20 +589,82 @@
 
   map.on(L.Draw.Event.EDITED, function (e) {
 
-    console.log(e.layers);
-    
-    // var popupContent = '<table>';
-    //   popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.land_type + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Ekish turi' + '</td><td>' + feature.properties.planting_type + '</td></tr>';
-    //   popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
-    // popupContent += `</table>`;
-    // ;
-    // layer.bindPopup(popupContent);
+    let popupContent = `<div class='save-polygon'>
+      <input name="contour_number"><label for="contour_number">Kontur raqami</label>
+      <input name="ball_bonitet"><label for="ball_bonitet">Hosildorlik (t)</label>`;
+
+    $.ajax({
+      url: '{{ url_for('api.crop.get_select_data') }}',
+      type: 'GET',
+      dataType: 'json',
+      xhrFields: {
+        withCredentials: true,
+      },
+      success: function (data) {
+        let number = Object.keys(e.layers._layers)[0];
+        let feature = e.layers._layers[number].feature;
+        let data_temp = feature.properties;
+        console.log(data_temp);
+        // console.log(data);
+        /*data.forEach(element => {
+          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
+        });
+        popupContent += "</select>";*/
+        Object.keys(data).forEach(key => {
+          popupContent += "<select name='" + data[key]['key'] + "' required>"
+          popupContent += "<option hidden disabled selected>Tanlang</option>"
+            data[key]['items'].forEach(element => {
+              popupContent += "<option value='" + element.id + "'>" + element.name + "</option>";
+            });
+          popupContent += "</select>";
+          popupContent += "<label for='" + data[key]['key'] + "'>" + data[key]['name'] + "</label>";
+        });
+        popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
+        e.layers._layers[number].bindPopup(popupContent).openPopup();
+        $("#save-polygon-btn").click(function () {
+          let contour_number = $("input[name='contour_number']").val();
+          let ball_bonitet = $("input[name='ball_bonitet']").val();
+          let crop_name = $("select[name='crop_name']").val();
+          let land_type_id = $("select[name='land_type_id']").val();
+          let planting_type_id = $("select[name='planting_type_id']").val();
+          let planting_method_id = $("select[name='planting_method_id']").val();
+          if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
+            let data = {
+              "geom": feature.geometry.coordinates,
+              "crop_name": crop_name,
+              "contour_number": contour_number,
+              "productivity": ball_bonitet,
+              "district_id": data_temp.district_id,
+              "land_type_id": land_type_id,
+              "planting_type_id": planting_type_id,
+              "planting_method_id": planting_method_id,
+              "farm_cad_number": data_temp.farm_cad_number,
+              "farm_tax_number": data_temp.farm_tax_number,
+            };
+            $.ajax({
+              url: '{{ url_for('api.crop.edit') }}',
+              type: 'POST',
+              dataType: 'json',
+              contentType: "application/json; charset=utf-8",
+              data: JSON.stringify(data),
+              xhrFields: {
+                withCredentials: true,
+              },
+              success: function (data) {
+                map.spin(false);
+                drawnItems.clearLayers();
+                
+                map.removeControl(drawControl);
+                drawnItems.clearLayers();
+                drawControl = new L.Control.Draw(options);
+                map.addControl(drawControl);
+                setLayer();
+              }
+            })
+          }
+        })
+      }
+    })  
 
   });
 
