@@ -186,8 +186,8 @@
     }
   });
 
-  var layerData1;
-
+  var drawnItems = new L.FeatureGroup();
+  map.addLayer(drawnItems);
   function setLayer() {
     $.ajax({
       url: '{{ url_for('api.crop.get_crop_geojson') }}',
@@ -276,8 +276,7 @@
 
               layer.on('dblclick', (e) => {
 
-                layer.latlngs = layer._latlngs[0];
-                layer._latlngs = layer.latlngs;
+                layer._latlngs = layer._latlngs[0];
 
                 var editItems = e.layer;
                 editItems = new L.FeatureGroup();
@@ -293,16 +292,11 @@
                 });
                 map.addControl(drawControl);
                 editItems.addLayer(layer);
-
-                layerData1 = layer;
                 // console.log(layer);
                 // console.log(layer.toGeoJSON().geometry);
+
+                console.log(editItems)
               });
-
-              // layer.on("draw:editstop", function (e) {
-              //     console.log('Edited!');
-              // });
-
             }
           });
           Layer.addTo(map);
@@ -431,9 +425,6 @@
   }
   setLayer()
 
-  var drawnItems = new L.FeatureGroup();
-  map.addLayer(drawnItems);
-
   var options = {
     position: 'topright',
     draw: {
@@ -475,9 +466,6 @@
     var type = e.layerType;
     var layer = e.layer;
     drawnItems.addLayer(layer);
-
-    console.log(layerData1);
-    console.log(layer);
        
     var objects = layer.getLatLngs()[0];
     var geom = [[]];
@@ -610,6 +598,25 @@
     //         // console.log(geom);
     //     })
   })
+
+  map.on(L.Draw.Event.EDITED, function (e) {
+
+    console.log(e.layers);
+    
+    // var popupContent = '<table>';
+    //   popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.land_type + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Ekish turi' + '</td><td>' + feature.properties.planting_type + '</td></tr>';
+    //   popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
+    // popupContent += `</table>`;
+    // ;
+    // layer.bindPopup(popupContent);
+
+  });
 
   map.on(L.Draw.Event.DELETED, function (e) {
     map.removeControl(drawControl);
