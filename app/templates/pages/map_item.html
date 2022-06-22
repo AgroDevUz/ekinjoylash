@@ -602,7 +602,8 @@
       },
       success: function (data) {
         let number = Object.keys(e.layers._layers)[0];
-        let feature = e.layers._layers[number].feature;
+        let layer = e.layers._layers[number];
+        let feature = layer.feature;
         let data_temp = feature.properties;
         console.log(data_temp);
         // console.log(data);
@@ -620,7 +621,7 @@
           popupContent += "<label for='" + data[key]['key'] + "'>" + data[key]['name'] + "</label>";
         });
         popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
-        e.layers._layers[number].bindPopup(popupContent).openPopup();
+        layer.bindPopup(popupContent).openPopup();
         $("#save-polygon-btn").click(function () {
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
@@ -640,6 +641,8 @@
               "planting_method_id": planting_method_id,
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
+              "id": data_temp.id,
+              "leaflet_id": layer._leaflet_id,
             };
             $.ajax({
               url: '{{ url_for('api.crop.edit') }}',
@@ -666,6 +669,37 @@
       }
     })  
 
+  });
+
+  map.on('draw:deleted', function (e) {
+    let number = Object.keys(e.layers._layers)[0];
+    let layer = e.layers._layers[number];
+    let feature = layer.feature;
+    let data_temp = feature.properties;
+    let data = {
+      "id": data_temp.id,
+      "leaflet_id": layer._leaflet_id,
+    };
+    $.ajax({
+      url: '{{ url_for('api.crop.delete') }}',
+      type: 'POST',
+      dataType: 'json',
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(data),
+      xhrFields: {
+        withCredentials: true,
+      },
+      success: function (data) {
+        map.spin(false);
+        drawnItems.clearLayers();
+        
+        map.removeControl(drawControl);
+        drawnItems.clearLayers();
+        drawControl = new L.Control.Draw(options);
+        map.addControl(drawControl);
+        setLayer();
+      }
+    })
   });
 
   map.on(L.Draw.Event.DELETED, function (e) {
