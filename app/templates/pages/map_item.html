@@ -64,6 +64,8 @@
   </section>
 </div>
 
+<button id="edit_button">Edit</button>
+
 {% endblock %}
 
 {% block right %}
@@ -130,7 +132,12 @@
     farm_tax_number: null,
     farm_cad_number: null,
   };
-  var full_name = null
+  var full_name = null;
+
+  var editing = false;
+
+  map.doubleClickZoom.disable(); 
+
   $.ajax({
     url: '{{ url_for('api.kadastr.getby_kadastr') }}?prefix=' + cadastral_number,
     type: 'GET',
@@ -163,7 +170,7 @@
       
       const Layer = L.geoJSON(data, {
         style: {
-          color: '#ccf781',
+          color: 'white',
           fillColor: 'transparent',
           weight: 2,
         },
@@ -178,6 +185,9 @@
       return data;
     }
   });
+
+  var layerData1;
+
   function setLayer() {
     $.ajax({
       url: '{{ url_for('api.crop.get_crop_geojson') }}',
@@ -192,7 +202,7 @@
       async: false,
       success: function (data) {
 
-        console.log(data);
+        // console.log(data);
 
         var t_r = 1;
         $("#right-bar").empty();
@@ -229,7 +239,7 @@
               weight: 3,
             },
             onEachFeature: function (feature, layer) {
-              console.log(feature.properties);
+              // console.log(feature.properties);
               var popupContent = '<table>';
                 popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
                 popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
@@ -241,7 +251,8 @@
                 popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
               popupContent += `</table>`;
               ;
-              layer.bindPopup(popupContent)
+              // layer.bindPopup(popupContent);
+
               // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
 
               var it = `<tr>
@@ -262,6 +273,36 @@
                 </tr>`;
               $("#right-tbody").append(it);
               t_r += 1;
+
+              layer.on('dblclick', (e) => {
+
+                layer.latlngs = layer._latlngs[0];
+                layer._latlngs = layer.latlngs;
+
+                var editItems = e.layer;
+                editItems = new L.FeatureGroup();
+                map.addLayer(editItems);
+                map.removeControl(drawControl);
+                drawControl = new L.Control.Draw({
+                  position: 'topright',
+                  draw: false,
+                  edit: {
+                    featureGroup: editItems,
+                    remove: true,
+                  }
+                });
+                map.addControl(drawControl);
+                editItems.addLayer(layer);
+
+                layerData1 = layer;
+                // console.log(layer);
+                // console.log(layer.toGeoJSON().geometry);
+              });
+
+              // layer.on("draw:editstop", function (e) {
+              //     console.log('Edited!');
+              // });
+
             }
           });
           Layer.addTo(map);
@@ -290,7 +331,7 @@
       },
       async: false,
       success: function (data) {
-        console.log(data);
+        // console.log(data);
         $("#right-bar").empty();
         var table_main = `
         <table id="right-table" class="table table-bordered">
@@ -413,7 +454,7 @@
       rectangle: false,
     },
     edit: {
-      featureGroup: drawnItems, //REQUIRED!!
+      featureGroup: drawnItems,
       remove: true,
     }
   };
@@ -424,8 +465,9 @@
     drawControl = new L.Control.Draw({
       position: 'topright',
       draw: false,
+      drag: true,
       edit: {
-        featureGroup: drawnItems, //REQUIRED!!
+        featureGroup: drawnItems,
         remove: true,
       }
     });
@@ -433,6 +475,9 @@
     var type = e.layerType;
     var layer = e.layer;
     drawnItems.addLayer(layer);
+
+    console.log(layerData1);
+    console.log(layer);
        
     var objects = layer.getLatLngs()[0];
     var geom = [[]];
@@ -480,7 +525,7 @@
         withCredentials: true,
       },
       success: function (data) {
-        console.log(data);
+        // console.log(data);
         /*data.forEach(element => {
           popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
         });
@@ -533,7 +578,7 @@
               },
               success: function (data) {
                 map.spin(false);
-                console.log(data);
+                // console.log(data);
                 drawnItems.clearLayers();
                 
                 map.removeControl(drawControl);
@@ -571,6 +616,14 @@
     drawControl = new L.Control.Draw(options);
     map.addControl(drawControl);
   });
+
+  // map.on(L.Draw.Event.EDITED, function (e) {
+  //     console.log("Edit started!");
+  //     // var layers = e.layers;
+  //     // layers.eachLayer(function (layer) {
+  //     //     //do whatever you want; most likely save back to db
+  //     // });
+  // });
 
 </script>
 {% endblock%}
