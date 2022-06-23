@@ -410,7 +410,7 @@ def edit():
         land_type_id = data.get('land_type_id')
         planting_type_id = data.get('planting_type_id')
         planting_method_id = data.get('planting_method_id')
-        geometry = {'type': 'MultiPolygon', 'coordinates': [geometry]}
+        geometry = {'type': 'Polygon', 'coordinates': geometry}
         try:
             geometry = wkt.dumps(geometry)
             geometry = "SRID=4326;%s"%geometry
