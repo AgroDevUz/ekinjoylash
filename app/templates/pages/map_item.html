@@ -119,6 +119,7 @@
 
   const map = L.map('map',
     {
+      drawControl: false,
       center: defaultCenter,
       zoom: defaultZoom,
       layers: [satellite],
@@ -188,6 +189,7 @@
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
+  var editItems = null;
 
   var allGeoJson = {}
   function setLayer() {
@@ -203,8 +205,6 @@
       },
       async: false,
       success: function (data) {
-
-        // console.log(data);
 
         var t_r = 1;
         $("#right-bar").empty();
@@ -241,7 +241,6 @@
               weight: 3,
             },
             onEachFeature: function (feature, layer) {
-              // console.log(feature.properties);
               var popupContent = '<table>';
                 popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
                 popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
@@ -254,8 +253,6 @@
               popupContent += `</table>`;
               ;
               layer.bindPopup(popupContent);
-
-              // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
 
               var it = `<tr>
               
@@ -281,7 +278,7 @@
 
                 layer._latlngs = layer._latlngs[0];
 
-                var editItems = e.layer;
+                editItems = e.layer;
                 editItems = new L.FeatureGroup();
                 map.addLayer(editItems);
                 map.removeControl(drawControl);
@@ -325,7 +322,6 @@
       },
       async: false,
       success: function (data) {
-        // console.log(data);
         $("#right-bar").empty();
         var table_main = `
         <table id="right-table" class="table table-bordered">
@@ -449,14 +445,15 @@
       remove: true,
     }
   };
+
   var drawControl = new L.Control.Draw(options);
   map.addControl(drawControl);
+
   map.on(L.Draw.Event.CREATED, function (e) {
     map.removeControl(drawControl);
     drawControl = new L.Control.Draw({
       position: 'topright',
       draw: false,
-      drag: true,
       edit: {
         featureGroup: drawnItems,
         remove: true,
@@ -465,7 +462,6 @@
     map.addControl(drawControl);
     var type = e.layerType;
     var layer = e.layer;
-    console.log(layer)
     drawnItems.addLayer(layer);
        
     var objects = layer.getLatLngs()[0];
@@ -549,7 +545,6 @@
               "farm_cad_number": data_temp.farm_cad_number,
               "farm_tax_number": data_temp.farm_tax_number,
             };
-            console.log(geom);
             $.ajax({
               url: '{{ url_for('api.crop.crop_main') }}',
               type: 'POST',
@@ -572,29 +567,25 @@
         })
       }
     })
-
-    // drawnItems.clearLayers();
-
-    // fetch('http://localhost:1001/save', {
-    //     method: 'POST',
-    //     headers: {
-    //         'Content-Type': 'application/json'
-    //     },
-    //     body: JSON.stringify(geom)
-    // })
-    //     .then(data => {
-    //         // location.reload();
-    //         renderData = null
-    //         addGeoJson()
-    //         // console.log(geom);
-    //     })
   })
 
   map.on(L.Draw.Event.EDITED, function (e) {
-    
+
+    // map.removeControl(drawControl);
+    // drawControl = new L.Control.Draw({
+    //   position: 'topright',
+    //   draw: false,
+    //   edit: {
+    //     featureGroup: editItems,
+    //     remove: true,
+    //   }
+    // });
+    // map.addControl(drawControl);
+
+    e.layers._layers = editItems._layers;
+
     var number = Object.keys(e.layers._layers)[0];
     var layer = e.layers._layers[number];
-    console.log(layer)
     var feature = layer.feature;
     var data_temp = feature.properties;
     var objects = layer.getLatLngs();
@@ -642,8 +633,6 @@
         withCredentials: true,
       },
       success: function (data) {
-        console.log(data_temp);
-        // console.log(data);
         /*data.forEach(element => {
           popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
         });
@@ -680,7 +669,6 @@
               "id": data_temp.id,
               "leaflet_id": layer._leaflet_id,
             };
-            console.log(data)
             $.ajax({
               url: '{{ url_for('api.crop.edit') }}',
               type: 'POST',
@@ -736,36 +724,6 @@
       }
     })
   });
-  function cancel() {
-    console.log("True")
-    map.removeControl(drawControl);
-    var options = {
-      position: 'topright',
-      draw: {
-        polygon: {
-          allowIntersection: false, // Restricts shapes to simple polygons
-          drawError: {
-            color: 'blue', // Color the shape will turn when intersects
-            message: '<strong>Oh snap!<strong> you can\'t draw that!', // Message that will show when intersect
-          },
-          shapeOptions: {
-            color: 'red',
-          }
-        },
-        circle: false,
-        circlemarker: false,
-        marker: false,
-        polyline: false,
-        rectangle: false,
-      },
-      edit: {
-        featureGroup: drawnItems,
-        remove: true,
-      }
-    };
-    var drawControl = new L.Control.Draw(options);
-    map.addControl(drawControl);
-  };
 
   map.on('draw:deletestop', function (e) {
     map.removeControl(drawControl);
