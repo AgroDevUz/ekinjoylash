@@ -85,7 +85,7 @@
 <script src="{{ url_for('static', filename='dist/js/map/style.js')}}"></script>
 
 <script>
-
+    var ALL_GEOJSON = {}
     const defaultCenter = [42, 64]
     const defaultZoom = 8
     cad_num = "{{data}}";
@@ -125,6 +125,7 @@
             withCredentials: true,
         },
         success: function (data) {
+            ALL_GEOJSON = data;
             const districtsLayer = L.geoJSON(data, {
                 style: districtStyle,
             })
@@ -134,7 +135,9 @@
                 ).openTooltip()
             map.fitBounds(districtsLayer.getBounds())
             map.spin(true)
+            $("#new_filter").removeClass("d-none");
             return data
+
         }
 
     });
@@ -234,14 +237,9 @@
         });
     }
 
-    function render_table(geojson_url){
+    function render_table(response){
 
-        $.ajax({
-
-            url: geojson_url,
-            dataType: "json"
-
-        }).always(response => {
+       
 
             var t_r = 1;
             $("#right-bar").empty();
@@ -298,7 +296,6 @@
 
             });
 
-        });
     }
 
     function zoomToFeature(e) {
@@ -340,12 +337,12 @@
             farmers._layers = farmers._layers_change;
             farmers.addTo(map);
             farmers._layers = farmers._layers0;
-            render_table('{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num, $("#new_filter").val());
+            render_table([ALL_GEOJSON]);
             map.spin(false);
         } else {
             farmers.addTo(map);
             farmers._layers = farmers._layers0;
-            render_table('{{url_for('api.kadastr.getby_prefix')}}?prefix=' + cad_num, $("#new_filter").val());
+            render_table([ALL_GEOJSON]);
             map.spin(false);
         }
 
@@ -356,7 +353,7 @@
         var div = L.DomUtil.create('div', 'filter');
         div.innerHTML = `
 
-            <select id="new_filter" >
+            <select id="new_filter" class="d-none">
                 
                     <option hidden disabled selected>Yer turi bo'yicha qidirish</option>
                     <option value="all">Barchasi</option>
@@ -386,6 +383,13 @@
 
     filter.addTo(map);
 
+
+
+
+
 </script>
 
 {% endblock%}
+
+
+
