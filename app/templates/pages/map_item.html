@@ -736,7 +736,7 @@
       }
     })
   });
-  /*function cancel() {
+  function cancel() {
     console.log("True")
     map.removeControl(drawControl);
     var options = {
@@ -765,17 +765,19 @@
     };
     var drawControl = new L.Control.Draw(options);
     map.addControl(drawControl);
-  }
-  console.log($("a:contains('Cancel')"))
-  $("a:contains('Cancel')").on("click", cancel)*/
-  
-  // map.on(L.Draw.Event.EDITED, function (e) {
-  //     console.log("Edit started!");
-  //     // var layers = e.layers;
-  //     // layers.eachLayer(function (layer) {
-  //     //     //do whatever you want; most likely save back to db
-  //     // });
-  // });
+  };
+
+  map.on('draw:deletestop', function (e) {
+    map.removeControl(drawControl);
+    drawControl = new L.Control.Draw(options);
+    map.addControl(drawControl);
+  });
+
+  map.on('draw:editstop', function (e) {
+    map.removeControl(drawControl);
+    drawControl = new L.Control.Draw(options);
+    map.addControl(drawControl);
+  });
 
 </script>
 {% endblock%}
