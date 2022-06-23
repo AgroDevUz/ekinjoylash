@@ -188,6 +188,8 @@
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
+
+  var allGeoJson = {}
   function setLayer() {
     $.ajax({
       url: '{{ url_for('api.crop.get_crop_geojson') }}',
@@ -251,7 +253,7 @@
                 popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
               popupContent += `</table>`;
               ;
-              // layer.bindPopup(popupContent);
+              layer.bindPopup(popupContent);
 
               // console.log($('path.leaflet-interactive __web-inspector-hide-shortcut__').fill);
 
@@ -275,6 +277,7 @@
               t_r += 1;
 
               layer.on('dblclick', (e) => {
+                map.closePopup()
 
                 layer._latlngs = layer._latlngs[0];
 
@@ -296,6 +299,7 @@
             }
           });
           Layer.addTo(map);
+          allGeoJson[key] = Layer
         })
 
         $("#right-table").DataTable({
@@ -461,6 +465,7 @@
     map.addControl(drawControl);
     var type = e.layerType;
     var layer = e.layer;
+    console.log(layer)
     drawnItems.addLayer(layer);
        
     var objects = layer.getLatLngs()[0];
@@ -556,8 +561,6 @@
               },
               success: function (data) {
                 map.spin(false);
-                drawnItems.clearLayers();
-                
                 map.removeControl(drawControl);
                 drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
@@ -588,10 +591,48 @@
   })
 
   map.on(L.Draw.Event.EDITED, function (e) {
+    
+    var number = Object.keys(e.layers._layers)[0];
+    var layer = e.layers._layers[number];
+    console.log(layer)
+    var feature = layer.feature;
+    var data_temp = feature.properties;
+    var objects = layer.getLatLngs();
+    var geom = [[]];
+    // o.Point {x: 744794.1851014761, y: -5309112.129212381}
+    var first = "";
+    for (var i = 0; i < objects.length; i++) {
+      if (i == 0) {
+        first = new L.latLng(objects[i].lat, objects[i].lng)};
+
+      var latlng = new L.latLng(objects[i].lat, objects[i].lng);
+      var point = latlng; 
+
+      geom[0].push([point['lng'], point['lat']]);
+    }
+    geom[0].push([first['lng'], first['lat']]);
+
+    var area = null
+
+    $.ajax({
+      url: '{{ url_for('api.crop.calc_area') }}',
+      type: 'POST',
+      dataType: 'json',
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        geom: geom,
+      }),
+      async: false,
+      success: function (data) {
+        area = data['area'];
+      }
+    })
 
     let popupContent = `<div class='save-polygon'>
-      <input name="contour_number"><label for="contour_number">Kontur raqami</label>
-      <input name="ball_bonitet"><label for="ball_bonitet">Hosildorlik (t)</label>`;
+      <input name='area' value='${full_name}' readonly><label for='area'>Full name</label>
+      <input name='area' value='${area.toFixed(2)}' readonly><label for='area'>Umumiy maydoni (ga)</label>
+      <input name="contour_number" value='${data_temp.contour_number}'><label for="contour_number">Kontur raqami</label>
+      <input name="ball_bonitet" value='${data_temp.ball_bonitet}'><label for="ball_bonitet">Hosildorlik (t)</label>`;
 
     $.ajax({
       url: '{{ url_for('api.crop.get_select_data') }}',
@@ -601,10 +642,6 @@
         withCredentials: true,
       },
       success: function (data) {
-        let number = Object.keys(e.layers._layers)[0];
-        let layer = e.layers._layers[number];
-        let feature = layer.feature;
-        let data_temp = feature.properties;
         console.log(data_temp);
         // console.log(data);
         /*data.forEach(element => {
@@ -613,16 +650,15 @@
         popupContent += "</select>";*/
         Object.keys(data).forEach(key => {
           popupContent += "<select name='" + data[key]['key'] + "' required>"
-          popupContent += "<option hidden disabled selected>Tanlang</option>"
             data[key]['items'].forEach(element => {
-              popupContent += "<option value='" + element.id + "'>" + element.name + "</option>";
+              popupContent += "<option value='" + element.id + `' ${element.id == data_temp[data[key]['key']] ? "selected" : ""}>` + element.name + "</option>";
             });
           popupContent += "</select>";
           popupContent += "<label for='" + data[key]['key'] + "'>" + data[key]['name'] + "</label>";
         });
-        popupContent += "<button id='save-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
+        popupContent += "<button id='edit-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
         layer.bindPopup(popupContent).openPopup();
-        $("#save-polygon-btn").click(function () {
+        $("#edit-polygon-btn").click(function () {
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
           let crop_name = $("select[name='crop_name']").val();
@@ -631,7 +667,7 @@
           let planting_method_id = $("select[name='planting_method_id']").val();
           if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
             let data = {
-              "geom": feature.geometry.coordinates,
+              "geom": geom,
               "crop_name": crop_name,
               "contour_number": contour_number,
               "productivity": ball_bonitet,
@@ -644,6 +680,7 @@
               "id": data_temp.id,
               "leaflet_id": layer._leaflet_id,
             };
+            console.log(data)
             $.ajax({
               url: '{{ url_for('api.crop.edit') }}',
               type: 'POST',
@@ -655,12 +692,13 @@
               },
               success: function (data) {
                 map.spin(false);
-                drawnItems.clearLayers();
-                
+                map.closePopup()
                 map.removeControl(drawControl);
-                drawnItems.clearLayers();
                 drawControl = new L.Control.Draw(options);
                 map.addControl(drawControl);
+                Object.keys(allGeoJson).forEach(function (key) {
+                  map.removeLayer(allGeoJson[key])
+                })
                 setLayer();
               }
             })
@@ -691,22 +729,43 @@
       },
       success: function (data) {
         map.spin(false);
-        drawnItems.clearLayers();
-        
         map.removeControl(drawControl);
-        drawnItems.clearLayers();
         drawControl = new L.Control.Draw(options);
         map.addControl(drawControl);
         setLayer();
       }
     })
   });
-
-  map.on(L.Draw.Event.DELETED, function (e) {
+  function cancel() {
+    console.log("True")
     map.removeControl(drawControl);
-    drawControl = new L.Control.Draw(options);
+    var options = {
+      position: 'topright',
+      draw: {
+        polygon: {
+          allowIntersection: false, // Restricts shapes to simple polygons
+          drawError: {
+            color: 'blue', // Color the shape will turn when intersects
+            message: '<strong>Oh snap!<strong> you can\'t draw that!', // Message that will show when intersect
+          },
+          shapeOptions: {
+            color: 'red',
+          }
+        },
+        circle: false,
+        circlemarker: false,
+        marker: false,
+        polyline: false,
+        rectangle: false,
+      },
+      edit: {
+        featureGroup: drawnItems,
+        remove: true,
+      }
+    };
+    var drawControl = new L.Control.Draw(options);
     map.addControl(drawControl);
-  });
+  };
 
   map.on('draw:deletestop', function (e) {
     map.removeControl(drawControl);
