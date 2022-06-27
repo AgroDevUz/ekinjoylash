@@ -147,6 +147,7 @@ def getby_kadastr():
 
     return jsonify(data)
 
+
 @crop.route('/get-crop-geojson')
 def get_crop_geojson():
     # crops = Crop.query.all()
@@ -197,6 +198,49 @@ def get_crop_geojson():
         code = CropName.query.get(int(crop_id)).code
         crops[code]['feature_collection']['features'].append(feature)
     return jsonify(crops)
+
+
+@crop.route('/get-crop-geojson-all')
+def get_crop_geojson_all():
+    # crops = Crop.query.all()
+    crop_names = CropName.query.all()
+    crops = {
+        "type": "FeatureCollection",
+        "features": []
+    }
+    crops_obj = db.session.query(Crop.id, Crop.crop_id, CropName.code, CropName.color, ST_AsGeoJSON(Crop.geometry), Crop.area, Crop.district_id, Crop.farm_tax_number, Crop.farm_cad_number, Crop.user_id, Crop.created_at, Crop.updated_at, Crop.productivity, Crop.contour_number, CropName.name, LandType.name, PlantingType.name, PlantingMethod.name)\
+        .join(CropName, CropName.id == Crop.crop_id)\
+        .join(LandType, LandType.id == Crop.land_type_id)\
+        .join(PlantingType, PlantingType.id == Crop.planting_type_id)\
+        .join(PlantingMethod, PlantingMethod.id == Crop.planting_method_id)\
+        .filter(Crop.farm_cad_number==request.args.get('cadastral_number')).all()
+    for id, crop_id, crop_code, crop_color, crop_geo, crop_area, crop_district_id, crop_farm_tax_number, crop_farm_cad_number, user_id, created_at, updated_at, ball_bonitet, contour_number, cropname, crop_land_type, crop_planting_type, crop_planting_method in crops_obj:
+        feature = {
+            "type": "Feature"
+        }
+        crop_geo = json.loads(crop_geo)
+        feature['geometry'] = crop_geo
+        feature['properties'] = {
+            'id': id,
+            'area': crop_area,
+            'district_id': crop_district_id,
+            "cropname" : cropname,
+            "crop_code": crop_code,
+            "crop_color": crop_color,
+            'farm_tax_number': crop_farm_tax_number,
+            'farm_cad_number': crop_farm_cad_number,
+            'user_id': user_id,
+            'created_at': created_at,
+            'updated_at': updated_at,
+            'ball_bonitet': ball_bonitet,
+            'contour_number': contour_number,
+            'land_type': crop_land_type,
+            'planting_type': crop_planting_type,
+            'planting_method': crop_planting_method
+        }
+        crops['features'].append(feature)
+    return jsonify(crops)
+
 
 @crop.route('/get-select-data')
 def get_select_data():
