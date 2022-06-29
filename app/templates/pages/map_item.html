@@ -140,7 +140,7 @@
   map.doubleClickZoom.disable(); 
 
   $.ajax({
-    url: '{{ url_for('api.kadastr.getby_kadastr') }}?prefix=' + cadastral_number,
+    url: "{{ url_for('api.kadastr.getby_kadastr') }}?prefix=" + cadastral_number,
     type: 'GET',
     dataType: 'json',
     xhrFields: {
@@ -189,12 +189,27 @@
 
   var drawnItems = new L.FeatureGroup();
   map.addLayer(drawnItems);
+
   var editItems = null;
 
   var allGeoJson = {}
+
+  featuresTable = L.control({
+    position: 'bottomleft'
+  });
+
+  var layerClickPrevent = false;
+
+  featuresTable.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'features_table'); // create a div with a class "info"
+    this.update();
+    return this._div;
+  }
+
   function setLayer() {
+
     $.ajax({
-      url: '{{ url_for('api.crop.get_crop_geojson') }}',
+      url: "{{ url_for('api.crop.get_crop_geojson_all') }}",
       type: 'GET',
       dataType: 'json',
       data: {
@@ -234,25 +249,79 @@
 
         $("#right-bar").append(table_main);
 
-        Object.keys(data).forEach(function (key) {
-          const Layer = L.geoJSON(data[key]['feature_collection'], {
+        for (let x = 0; x < Object.keys(data).length; x++) {
+
+          map.spin(false);
+
+          const Layer = L.geoJSON(data.features[x], {
             style: {
-              color: data[key]['color'],
+              color: data.features[x].properties['crop_color'],
               weight: 3,
             },
             onEachFeature: function (feature, layer) {
-              var popupContent = '<table>';
-                popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
-                popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + data[key]['name'] + '</td></tr>';
-                popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
-                popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
-                popupContent += '<tr><td>' + 'Umumiy maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
-                popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.land_type + '</td></tr>';
-                popupContent += '<tr><td>' + 'Ekish turi' + '</td><td>' + feature.properties.planting_type + '</td></tr>';
-                popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
-              popupContent += `</table>`;
-              ;
-              layer.bindPopup(popupContent);
+
+              layer.on('click', (e) => {
+
+                if (layerClickPrevent === false) {
+                  editItems = e.layer;
+                  editItems = new L.FeatureGroup();
+                  map.addLayer(editItems);
+                  map.removeControl(drawControl);
+
+                  drawControl = new L.Control.Draw({
+                    position: 'topright',
+                    draw: {
+                      polygon: {
+                        allowIntersection: false, // Restricts shapes to simple polygons
+                        drawError: {
+                          color: 'blue', // Color the shape will turn when intersects
+                          message: '<strong>Oh snap!<strong> you can\'t draw that!', // Message that will show when intersect
+                        },
+                        shapeOptions: {
+                          color: 'red',
+                        }
+                      },
+                      circle: false,
+                      circlemarker: false,
+                      marker: false,
+                      polyline: false,
+                      rectangle: false,
+                    },
+                    edit: {
+                      featureGroup: editItems,
+                      remove: true,
+                    }
+                  });
+                  map.addControl(drawControl);
+                  editItems.addLayer(layer);
+
+                  popupContent = '<table>';
+                    popupContent += '<tr><td>' + 'Full name' + '</td><td>' + full_name + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Ekin nomi' + '</td><td>' + feature.properties.crop_name + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Kontur raqami' + '</td><td>' + feature.properties.contour_number + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Hosildorlik (t)' + '</td><td>' + feature.properties.ball_bonitet + '</td></tr>';
+                    popupContent += '<tr><td>' + 'U. maydoni (ga)' + '</td><td>' + feature.properties.area.toFixed(2) + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.land_type + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Ekish turi' + '</td><td>' + feature.properties.planting_type + '</td></tr>';
+                    popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.planting_method + '</td></tr>';
+                    popupContent += '<a class="leaflet-popup-close-button" role="button" aria-label="Close popup" href="#close"><span aria-hidden="true">×</span></a>'
+                  popupContent += `</table>`;
+
+                  featuresTable.update = function (props) {
+                    this._div.innerHTML = popupContent;
+                  };
+
+                  featuresTable.addTo(map);
+
+                  $('.leaflet-popup-close-button').click(function () {
+                    featuresTable.remove();
+                  })
+
+                } else {
+
+                }
+              
+              });
 
               var it = `<tr>
               
@@ -272,32 +341,11 @@
                 </tr>`;
               $("#right-tbody").append(it);
               t_r += 1;
-
-              layer.on('dblclick', (e) => {
-                map.closePopup()
-
-                layer._latlngs = layer._latlngs[0];
-
-                editItems = e.layer;
-                editItems = new L.FeatureGroup();
-                map.addLayer(editItems);
-                map.removeControl(drawControl);
-                drawControl = new L.Control.Draw({
-                  position: 'topright',
-                  draw: false,
-                  edit: {
-                    featureGroup: editItems,
-                    remove: true,
-                  }
-                });
-                map.addControl(drawControl);
-                editItems.addLayer(layer);
-              });
             }
           });
           Layer.addTo(map);
-          allGeoJson[key] = Layer
-        })
+          allGeoJson[x] = Layer
+        }
 
         $("#right-table").DataTable({
 
@@ -309,8 +357,9 @@
         return data;
       }
     });
+
     $.ajax({
-      url: '{{ url_for('api.crop.get_crop_data_by_farmer') }}',
+      url: "{{ url_for('api.crop.get_crop_data_by_farmer') }}",
       type: 'POST',
       dataType: 'json',
       contentType: 'application/json',
@@ -482,7 +531,7 @@
     var area = null
 
     $.ajax({
-      url: '{{ url_for('api.crop.calc_area') }}',
+      url: "{{ url_for('api.crop.calc_area') }}",
       type: 'POST',
       dataType: 'json',
       contentType: "application/json; charset=utf-8",
@@ -501,7 +550,7 @@
       <input name='contour_number'><label for='contour_number'>Kontur raqami</label>
       <input name='ball_bonitet'><label for='ball_bonitet'>Hosildorlik (t)</label>`
     $.ajax({
-      url: '{{ url_for('api.crop.get_select_data') }}',
+      url: "{{ url_for('api.crop.get_select_data') }}",
       type: 'GET',
       dataType: 'json',
       xhrFields: {
@@ -546,7 +595,7 @@
               "farm_tax_number": data_temp.farm_tax_number,
             };
             $.ajax({
-              url: '{{ url_for('api.crop.crop_main') }}',
+              url: "{{ url_for('api.crop.crop_main') }}",
               type: 'POST',
               dataType: 'json',
               contentType: "application/json; charset=utf-8",
@@ -571,16 +620,7 @@
 
   map.on(L.Draw.Event.EDITED, function (e) {
 
-    // map.removeControl(drawControl);
-    // drawControl = new L.Control.Draw({
-    //   position: 'topright',
-    //   draw: false,
-    //   edit: {
-    //     featureGroup: editItems,
-    //     remove: true,
-    //   }
-    // });
-    // map.addControl(drawControl);
+    layerClickPrevent = true;
 
     e.layers._layers = editItems._layers;
 
@@ -619,35 +659,42 @@
       }
     })
 
-    let popupContent = `<div class='save-polygon'>
-      <input name='area' value='${full_name}' readonly><label for='area'>Full name</label>
-      <input name='area' value='${area.toFixed(2)}' readonly><label for='area'>Umumiy maydoni (ga)</label>
-      <input name="contour_number" value='${data_temp.contour_number}'><label for="contour_number">Kontur raqami</label>
-      <input name="ball_bonitet" value='${data_temp.ball_bonitet}'><label for="ball_bonitet">Hosildorlik (t)</label>`;
-
     $.ajax({
-      url: '{{ url_for('api.crop.get_select_data') }}',
+      url: "{{ url_for('api.crop.get_select_data') }}",
       type: 'GET',
       dataType: 'json',
       xhrFields: {
         withCredentials: true,
       },
       success: function (data) {
-        /*data.forEach(element => {
-          popupContent += "<option value='" + element.code + "'>" + element.name + "</option>";
-        });
-        popupContent += "</select>";*/
+
+        popupContent = `<div id='edit-save-polygon' class='save-polygon'>
+          <input name='contour_number' value="${data_temp.contour_number}"><label for='contour_number'>Kontur raqami</label>
+          <input name='ball_bonitet' value="${data_temp.ball_bonitet}"><label for='ball_bonitet'>Hosildorlik (t)</label>`;
+
         Object.keys(data).forEach(key => {
           popupContent += "<select name='" + data[key]['key'] + "' required>"
             data[key]['items'].forEach(element => {
-              popupContent += "<option value='" + element.id + `' ${element.id == data_temp[data[key]['key']] ? "selected" : ""}>` + element.name + "</option>";
+              popupContent += "<option value='" + element.id + `' ${element.name == data_temp[data[key]['key']] ? "selected" : ""}>` + element.name + "</option>";
             });
           popupContent += "</select>";
           popupContent += "<label for='" + data[key]['key'] + "'>" + data[key]['name'] + "</label>";
         });
-        popupContent += "<button id='edit-polygon-btn' class='btn btn-success' style='padding-top: 10px'>Save</button></div>";
-        layer.bindPopup(popupContent).openPopup();
+        popupContent += "<div class='edit-buttons'><button id='edit-polygon-btn' class='btn btn-success' style='padding: 10px'>Save</button><button id='edit-polygon-cancel-btn' class='btn btn-success' style='padding: 10px'>Cancel</button></div></div>";
+
+        featuresTable.update = function (props) {
+          this._div.innerHTML = popupContent;
+        };
+
+        featuresTable.addTo(map);
+
+        $("#edit-polygon-cancel-btn").click(function () {
+          featuresTable.remove();
+          layerClickPrevent = false;
+        });
+
         $("#edit-polygon-btn").click(function () {
+          layerClickPrevent = false;
           let contour_number = $("input[name='contour_number']").val();
           let ball_bonitet = $("input[name='ball_bonitet']").val();
           let crop_name = $("select[name='crop_name']").val();
@@ -655,6 +702,7 @@
           let planting_type_id = $("select[name='planting_type_id']").val();
           let planting_method_id = $("select[name='planting_method_id']").val();
           if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
+            console.log('Only left to save that data!');
             let data = {
               "geom": geom,
               "crop_name": crop_name,
@@ -670,7 +718,7 @@
               "leaflet_id": layer._leaflet_id,
             };
             $.ajax({
-              url: '{{ url_for('api.crop.edit') }}',
+              url: "{{ url_for('api.crop.edit') }}",
               type: 'POST',
               dataType: 'json',
               contentType: "application/json; charset=utf-8",
@@ -680,7 +728,6 @@
               },
               success: function (data) {
                 map.spin(false);
-                map.closePopup()
                 map.removeControl(drawControl);
                 drawControl = new L.Control.Draw(options);
                 map.addControl(drawControl);
@@ -707,7 +754,7 @@
       "leaflet_id": layer._leaflet_id,
     };
     $.ajax({
-      url: '{{ url_for('api.crop.delete') }}',
+      url: "{{ url_for('api.crop.delete') }}",
       type: 'POST',
       dataType: 'json',
       contentType: "application/json; charset=utf-8",

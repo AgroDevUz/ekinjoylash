@@ -224,7 +224,7 @@ def get_crop_geojson_all():
             'id': id,
             'area': crop_area,
             'district_id': crop_district_id,
-            "cropname" : cropname,
+            "crop_name" : cropname,
             "crop_code": crop_code,
             "crop_color": crop_color,
             'farm_tax_number': crop_farm_tax_number,
