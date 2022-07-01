@@ -141,6 +141,16 @@
         }
 
     });
+    
+    featuresTable = L.control({
+        position: 'bottomleft'
+    });
+    
+    featuresTable.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'features_table'); // create a div with a class "info"
+        this.update();
+        return this._div;
+    }
 
     function render_map(geojson_url){
 
@@ -175,71 +185,78 @@
                 </tbody>
             </table>`
             $("#right-bar").append(table_main);
-            for (var item of response[0].features) {
-    
-                var pr = item.properties;
-                var it = `<tr>
-                        <td class="text-center" >${t_r} </td>
-                        <td> ${pr.full_name} </td>
-                        <td> ${pr.baunit_type_title} </td>
-                        <td> ${pr.cadastral_number} </td>
-                        <td> ${pr.tax_number} </td>
-                        <td> ${pr.legal_area} </td>
-                        <td> ${pr.total_farmland_areas} </td>
-                        <td> ${pr.total_arable_areas} </td>
-                        <td> ${pr.arable_areas_with_water} </td>
-                        <td> ${pr.arable_areas_without_wtr} </td>
-    
-                    </tr>`;
-                $("#right-tbody").append(it);
-                t_r += 1;
-    
-            };
-    
-            $("#right-table").DataTable({
-    
-                "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false,
-    
-            });
-            
-            farmers = L.geoJSON(response, {
-    
-                style: farmerStyle,
-                onEachFeature: function (feature, layer) {
-                    layer.on({
-                        click: zoomToFeature
-                    });
-    
-                    var popupContent = '<table>';
-    
-                        popupContent += '<tr><td>' + 'Suvli sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_with_water + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Suvsiz sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_without_wtr + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Yet turi' + '</td><td>' + feature.properties.baunit_type_title + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Kadastr raqami' + '</td><td>' + feature.properties.cadastral_number + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Nomi' + '</td><td>' + feature.properties.full_name + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Jami maydoni' + '</td><td>' + feature.properties.legal_area + '</td></tr>';
-                        popupContent += '<tr><td>' + 'STIR Raqami' + '</td><td>' + feature.properties.tax_number + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Jami sug\'ariladigan yerlar' + '</td><td>' + feature.properties.total_arable_areas + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Jami q.x. yerlari' + '</td><td>' + feature.properties.total_farmland_areas + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Tuman' + '</td><td>' + feature.properties.tuman + '</td></tr>';
-                        popupContent += '<tr><td>' + 'Viloyat' + '</td><td>' + feature.properties.viloyat + '</td></tr>';
-    
-                    popupContent += `</table> <br/><a href="/map/item?cadastral_number=${feature.properties.cadastral_number}">View detail</a>`
-                    layer.bindPopup(popupContent);
-    
-                }
-    
-            });
-    
-            farmers.addTo(map);
-            map.spin(false);
-    
-        });
+                for (var item of response[0].features) {
+        
+                    var pr = item.properties;
+                    var it = `<tr>
+                            <td class="text-center" >${t_r} </td>
+                            <td> ${pr.full_name} </td>
+                            <td> ${pr.baunit_type_title} </td>
+                            <td> ${pr.cadastral_number} </td>
+                            <td> ${pr.tax_number} </td>
+                            <td> ${pr.legal_area} </td>
+                            <td> ${pr.total_farmland_areas} </td>
+                            <td> ${pr.total_arable_areas} </td>
+                            <td> ${pr.arable_areas_with_water} </td>
+                            <td> ${pr.arable_areas_without_wtr} </td>
+        
+                        </tr>`;
+                    $("#right-tbody").append(it);
+                    t_r += 1;
+        
+                };
+        
+                $("#right-table").DataTable({
+        
+                    "responsive": true, "lengthChange": false, "autoWidth": false, "pageLength": 15, "searching": false,
+        
+                });
+                
+                farmers = L.geoJSON(response, {
+        
+                    style: farmerStyle,
+                    onEachFeature: function (feature, layer) {
+
+                        layer.on("click", (e) => {
+
+                            popupContent = '<table>';
+                                popupContent += '<tr><td>' + 'Nomi' + '</td><td>' + feature.properties.full_name + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Kadastr raqami' + '</td><td>' + feature.properties.cadastral_number + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Yer turi' + '</td><td>' + feature.properties.baunit_type_title + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Jami maydoni' + '</td><td>' + feature.properties.legal_area.toFixed(2) + '</td></tr>';
+                                popupContent += '<tr><td>' + 'STIR raqami' + '</td><td>' + feature.properties.tax_number + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Jami sug\'ariladigan yerlar' + '</td><td>' + feature.properties.total_arable_areas + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Suvli sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_with_water + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Suvsiz sug\'ariladigan yerlar' + '</td><td>' + feature.properties.arable_areas_without_wtr + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.tuman + '</td></tr>';
+                                popupContent += '<tr><td>' + 'Ekish usuli' + '</td><td>' + feature.properties.viloyat + '</td></tr>';
+                                popupContent += '<a class="leaflet-popup-close-button" role="button" aria-label="Close popup" href="#close"><span aria-hidden="true">×</span></a>'
+                            popupContent += `</table>`;
+
+                            featuresTable.update = function (props) {
+                                this._div.innerHTML = popupContent;
+                            };
+
+                            featuresTable.addTo(map);
+
+                            $('.leaflet-popup-close-button').click(function () {
+                                featuresTable.remove();
+                            })
+
+                            zoomToFeature(e);
+
+                        })
+
+                    }
+                })
+        
+                farmers.addTo(map);
+                map.spin(false);
+
+        })
     }
 
     function render_table(response){
-
-       
 
             var t_r = 1;
             $("#right-bar").empty();
@@ -302,9 +319,9 @@
 
         var layer = e.target;
         farmers.resetStyle();
-        layer.setStyle({ fillColor: farmerColors[tables[this.feature.properties.baunit_type]], color: 'white', weight: '3', opacity: 1, fillOpacity: 0.8 })
+        layer.setStyle({ fillColor: farmerColors[tables[layer.feature.properties.baunit_type]], color: 'white', weight: '3', opacity: 1, fillOpacity: 0.8 })
         map.fitBounds(e.target.getBounds());
-        
+
     };
 
     $(document).ready(function(){

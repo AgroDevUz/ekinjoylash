@@ -221,6 +221,8 @@
       async: false,
       success: function (data) {
 
+        console.log(data);
+
         var t_r = 1;
         $("#right-bar").empty();
         var table_main = `
@@ -628,7 +630,7 @@
     var layer = e.layers._layers[number];
     var feature = layer.feature;
     var data_temp = feature.properties;
-    var objects = layer.getLatLngs();
+    var objects = layer.getLatLngs()[0];
     var geom = [[]];
     // o.Point {x: 744794.1851014761, y: -5309112.129212381}
     var first = "";
@@ -702,7 +704,7 @@
           let planting_type_id = $("select[name='planting_type_id']").val();
           let planting_method_id = $("select[name='planting_method_id']").val();
           if (crop_name != null && contour_number != null && ball_bonitet != null && land_type_id != null && planting_type_id != null && planting_method_id != null) {
-            console.log('Only left to save that data!');
+            console.log(geom);
             let data = {
               "geom": geom,
               "crop_name": crop_name,
