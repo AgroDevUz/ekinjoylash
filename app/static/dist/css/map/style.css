@@ -30,7 +30,7 @@
 }
 
 .features_table {
-    padding: 2%;
+    padding: 5%;
     min-width: 450px;
     max-width: 500px;
     background-color: white;
@@ -48,14 +48,12 @@
 .features_table table tbody tr {
     width: 100%;
     display: inline-flex;
+    border-bottom: 1px solid #333;
 }
 
 .features_table table td {
     width: 100%;
-    min-width: 50%;
-}
-
-.features_table table td {
+    min-width: 100px;
     max-height: 100px;
 }
 
